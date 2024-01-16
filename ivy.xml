@@ -1,0 +1,22 @@
+<ivy-module version="2.0">
+    <info organisation="de.dass-it" module="nupama"/>
+    <dependencies>
+        <dependency org="org.apache.velocity" name="velocity-engine-core" rev="2.3" transitive="false"/>
+        <dependency org="org.apache.velocity.tools" name="velocity-tools-generic" rev="3.1" transitive="false"/>
+        <dependency org="org.apache.velocity.tools" name="velocity-tools-view" rev="3.1" transitive="false"/>
+	<dependency org="commons-beanutils" name="commons-beanutils" rev="[1.9.4,1.9.99]" transitive="false"/>
+	<dependency org="org.apache.commons" name="commons-digester3" rev="latest.release" transitive="false"/>
+	<dependency org="org.apache.commons" name="commons-lang3" rev="3.13.0" transitive="false"/>
+	<dependency org="commons-collections" name="commons-collections" rev="latest.release" transitive="false"/>
+	<dependency org="commons-logging" name="commons-logging" rev="1.2" transitive="false"/>
+	<dependency org="org.slf4j" name="slf4j-api" rev="2.0.9" transitive="false"/>
+	<dependency org="org.slf4j" name="slf4j-simple" rev="2.0.9" transitive="false"/>
+	<dependency org="com.github.cliftonlabs" name="json-simple" rev="4.0.1" transitive="false"/>
+        <dependency org="com.j256.ormlite" name="ormlite-core" rev="6.1" transitive="false"/>
+        <dependency org="com.j256.ormlite" name="ormlite-jdbc" rev="6.1" transitive="false"/>
+        <!-- <dependency org="org.json" name="json" rev="20230618" transitive="false"/> -->
+        <dependency org="org.jdom" name="jdom2" rev="2.0.6.1" transitive="false"/>
+        <dependency org="org.postgresql" name="postgresql" rev="latest.release" transitive="false"/>
+        <dependency org="javax.servlet" name="javax.servlet-api" rev="latest.release" transitive="false"/>
+    </dependencies>
+</ivy-module>

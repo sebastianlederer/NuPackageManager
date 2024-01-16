@@ -1,0 +1,18 @@
+#set($factory = $upstream)
+#set ($module = "upstream")
+#set ($Integer = 0)
+#if ($form_action=="edit")
+#set ($obj=$factory.getById($Integer.parseInt($params.key)))
+#else
+#set ($obj=$factory.makeNew())
+#set ($obj.name=$params.name)
+#end
+#set ($obj.description = $!params.description)
+#set ($obj.dist = $!params.dist)
+#set ($obj.component = $!params.component)
+#set ($obj.arch = $!params.arch)
+#set ($obj.url = $!params.url)
+#set ($obj.type = $!params.type)
+#set ($obj.pubkey = $!params.pubkey)
+$factory.save($obj)
+$response.sendRedirect("$root/$module/index.vm")

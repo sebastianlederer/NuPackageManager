@@ -1,0 +1,6 @@
+#set($layout="empty.vm")
+#set($name=$params.key)
+#if($name.matches("[-.A-Za-z0-9]+"))
+#set($r=$response.setContentType("text/plain"))
+$exec.call("sudo /usr/local/sbin/packagemanager-cert info $name")
+#end

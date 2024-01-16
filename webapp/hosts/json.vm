@@ -1,0 +1,23 @@
+#set ($layout="json.vm")
+#set ($dummy = $dbtool)
+#set ($Integer = 0)
+#set ($res=${response.setContentType("application/json")})
+#if($params.key)
+#set ($c=$hosts.getById($Integer.parseInt($params.key)))
+#set ($comps=[ $c ])
+#{else}[
+#set ($comps=$hosts.getAll())
+#end
+#set ($count=$comps.size())
+#foreach ($c in $sorter.sort($comps,"name"))
+#if ($count!=$foreach.count)
+#set ($sep=",")
+#else
+#set ($sep="")
+#end
+#set($status.value=0)
+{ "id": $c.id, "name": "$c.name", "description": "$!c.description", "ipAddress": "$!c.ipAddress", "macAddress": "$!c.macAddress", "owner": "$!c.owner", "options": "$!esc.javascript($c.options)", "profileName": "$!c.profile.name", "updateCount": $c.updateCount, "updateCountOrigin": $c.updateCountOrigin, "action": "$!c.action", "result":"$!c.result" }$!sep
+#end
+#if(!$params.key)
+]
+#end

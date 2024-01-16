@@ -1,0 +1,10 @@
+#set($layout="empty.vm")
+#set ($res=${response.setContentType("text/plain")})
+#set($module="hosts")
+#access_admin()
+#set($name=$params.key)
+#set($password=$params.password)
+#if($name.matches("[-.A-Za-z0-9]+") && $password.matches("[-A-Za-z0-9,._$%/=]+"))
+$exec.pipe("sudo /usr/local/sbin/packagemanager-cert create $name",$password)#else
+error: invalid hostname or password
+#end

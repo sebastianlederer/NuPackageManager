@@ -1,0 +1,5 @@
+# the content of the sources.list file is
+# added automatically at the end of the file,
+# and also an EOF token
+sudo sh -c "cat >/etc/apt/sources.list" <<EOF
+# automatically generated, do not edit!

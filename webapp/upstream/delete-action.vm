@@ -1,0 +1,3 @@
+#set ($Integer = 0)
+#delete_action($upstream,"upstream", $Integer.parseInt($params.key))
+

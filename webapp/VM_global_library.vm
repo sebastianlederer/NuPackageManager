@@ -1,0 +1,361 @@
+#macro( test $s)
+Test $s
+#end
+
+#macro( js_dialog_form $name $save_label $icon $start_disabled $max_height $narrow )
+		$('#button-${name}').button({disabled: ${start_disabled}, icons: { primary: "${icon}" }})
+			.click(function() {
+#if( $max_height )
+				$("#dialog-form-${name}").dialog("option","height", $(window).innerHeight());
+#else
+				$("#dialog-form-${name}").dialog();
+#end
+				i = grid.getSelectedRows()[0];
+				o = dataView.getItem(i)
+				console.log(o);
+				form_${name}_load(o);
+				$( "#dialog-form-${name}" ).dialog( "open" );
+			});
+
+		$("#dialog-form-${name}").dialog({
+			autoOpen: false,
+#if ( $max_height )
+			height: 800,
+#end
+#if ( ! $narrow)
+			width: 1000,
+#else
+			width: 480,
+#end
+			modal: true,
+			resizable: false,
+			buttons: {
+				"${save_label}": function() {
+					var bValid = form_${name}_validate();
+					if( bValid ) {
+						$( this ).dialog( "close" );
+						if(typeof(form_${name}_submit) == typeof(Function)) {
+							form_${name}_submit();
+						}
+						else {
+							$( "#form-${name}" ).submit();
+						}
+					}
+				},
+				Cancel: function() {
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$("input").removeClass( "ui-state-error" );
+			}
+		});
+
+#end
+
+#macro( js_dialog_simple $name $save_label $icon $start_disabled )
+		$('#button-${name}').button({disabled: ${start_disabled}, icons: { primary: "${icon}" }})
+			.click(function() {
+				$("#dialog-form-${name}").dialog();
+				i = grid.getSelectedRows()[0];
+				o = dataView.getItem(i)
+				console.log(o);
+				form_${name}_load(o);
+				$( "#dialog-form-${name}" ).dialog( "open" );
+			});
+
+		$("#dialog-form-${name}").dialog({
+			autoOpen: false,
+			modal: true,
+			resizable: false,
+			buttons: {
+				"${save_label}": function() {
+					$("input").removeClass( "ui-state-error" );
+					var bValid = true;
+					$( this ).dialog( "close" );
+					$( "#form-${name}" ).submit();
+				},
+				"Abbrechen": function() {
+					$( this ).dialog( "close" );
+					$("input").removeClass( "ui-state-error" );
+				}
+			},
+			close: function() {
+				// allFields.val( "" ).removeClass( "ui-state-error" );
+				$("input").removeClass( "ui-state-error" );
+			}
+		});
+#end
+
+#macro( js_create_layout )
+#[[ // create the layout - with data-table wrapper as the layout-content element
+		var myLayout = $('body').layout({
+		resizeWhileDragging:		true,
+		useStateCookie:			false, // enable state management
+		closable:			false,
+		resizable:			false,
+		north__spacing_open:			0,
+		south__spacing_open:			0,
+		north__size:			"auto"
+		});
+]]#
+#end
+
+#macro( js_create_grid $columns )
+#[[ // create the layout - with data-table wrapper as the layout-content element
+		var options = { multiSelect: false, enableCellNavigation: true, enableColumnReorder: false, forceFitColumns: true };
+		var data = [];
+		var myLayout = $('body').layout({
+		resizeWhileDragging:		true,
+		useStateCookie:			false, // enable state management
+		center__onresize:		function(pane_name, pane, state, options) {
+							grid.resizeCanvas();
+						},
+		closable:			false,
+		resizable:			false,
+		north__spacing_open:			0,
+		south__spacing_open:			0,
+		});
+]]#
+		dataView = new Slick.Data.DataView();
+		grid = new Slick.Grid(myLayout.panes.center, dataView, ${columns}, options);
+		grid.setSelectionModel(new Slick.RowSelectionModel());
+		dataView.onRowCountChanged.subscribe(function (e, args) {
+			grid.updateRowCount();
+			grid.render();
+}		);
+		dataView.onRowsChanged.subscribe(function (e, args) {
+        		grid.invalidateRows(args.rows);
+        		grid.render();
+		});
+#end
+
+#macro( js_load_data $module $unique)
+		// load data via async JSON request
+		$.getJSON('${root}/${module}/json.vm', function(result) {
+			dataView.setItems(result,"$unique");
+			grid.invalidate();
+			$('#ajaxBusy').hide();
+		})
+		.error(function(jqXHR, textStatus, errorThrown) { alert("getJSON error "+errorThrown); });
+#end
+
+#macro( js_load_data_key $module $unique $key)
+		// load data via async JSON request
+		$.getJSON('${root}/${module}/json.vm?$key', function(result) {
+			dataView.setItems(result,"$unique");
+			grid.invalidate();
+			$('#ajaxBusy').hide();
+		})
+		.error(function(jqXHR, textStatus, errorThrown) { alert("getJSON error "+errorThrown); });
+#end
+
+#macro(dropdown $name $options $selection)
+	<select id="$name" name="$name" size="1">
+#foreach ($o in $options)
+#if ($o == $selection)
+		<option selected="selected">$o</option>
+#else
+		<option>$o</option>
+#end
+#end
+	</select>
+#end
+
+#macro(checkbox $name $label $value)
+		<label for="$name"></label>
+#if($value)
+                <input type="checkbox" name="$name" id="$name" value="$name" checked>
+#else
+                <input type="checkbox" name="$name" id="$name" value="$name" >
+#end
+                $label
+#end
+
+#macro(searchbox)
+<input type="text" class="searchbox" id="search" name="search" value="">
+<div class="ui-icon ui-icon-search" style="float:right"></div>
+#end
+
+#macro(js_searchbox)
+		$("#search").keyup(function (e) {
+			Slick.GlobalEditorLock.cancelCurrentEdit();
+			if (e.which == 27) {     // clear on Esc
+				this.value = "";
+			}
+			updateFilter(this.value);
+		});
+		$("#search").val("");
+		dataView.setFilter(myFilter);
+		dataView.setFilterArgs( {searchString: ""});
+#end
+
+#macro(inputbox $name $label $enable)
+		<label for="$name">$label</label>
+		<input type="text" name="$name" id="$name" #if($!enable==false) disabled #end class="text ui-widget-content ui-corner-all #if($!enable==false) ui-state-disabled #end"/>
+#end
+
+#macro(inputboxtype $name $label $enable $type)
+		<label for="$name">$label</label>
+		<input type="$type" name="$name" id="$name" #if($!enable==false) disabled #end class="text ui-widget-content ui-corner-all #if($!enable==false) ui-state-disabled #end"/>
+#end
+
+#macro(delete_action $factory $module $key)
+#access_admin()
+#set ($obj = $factory.getById($key))
+#set ($r = $factory.delete($obj))
+#return_to_index($module)
+#end
+
+#macro(rename_action $old_name $new_name $factory $module)
+#access_admin()
+#if ($factory.nameExists($new_name))
+Error: $new_name already exists
+#else
+#set ($obj = $factory.getByName($old_name))
+#set ($obj.name = $new_name)
+#set ($dummy = $factory.save($obj))
+#return_to_index($module)
+#end
+#end
+
+#macro(return_to_index $module)
+#set($filter="")
+#if($params.profile)
+#set($filter="profile=$params.profile")
+#end
+#if($params.list)
+#set($filter="$filter&list=$params.list")
+#end
+#if($params.show)
+#set($filter="$filter&show=$params.show")
+#end
+#if($params.computer)
+#set($filter="computer=$params.computer")
+#end
+#if($filter.startsWith('&'))
+#set($filter=$filter.substring(1))
+#end
+#if ($filter!="")
+#set($filter="?$filter")
+#end
+#set($r=$response.sendRedirect("$root/$module/index.vm$!filter"))
+#end
+
+#macro(access $role)
+#if(!$request.isUserInRole($role))
+#set($r=$response.sendError(403))
+#stop
+#end
+#end
+
+#macro(access_admin)
+#if(!$request.isUserInRole("packageadmin"))
+#set($r=$response.sendError(403))
+#stop
+#end
+#end
+
+#macro(access_approver)
+#if(!$request.isUserInRole("packageapprover"))
+#set($r=$response.sendError(403))
+#stop
+#end
+#end
+
+#macro(taskstatus)
+#set($s=$status.defaultStatus)
+&nbsp;&nbsp;&nbsp;&nbsp;
+<span id="task_progress" class="greynumber-big"></span>
+<span id="task_status"></span>
+<script>
+function updateTaskStatus() {
+	$.getJSON("$root/taskstatus.vm", function(data) {
+		let p = data.progress;
+		if(p != '') p = '&nbsp;' + p + '&nbsp;';
+		$('#task_progress').html(p);
+		$('#task_status').html(data.task + ' ' + data.message);
+	});
+}
+ $(document).ready(function() {
+	setInterval(updateTaskStatus, 5000);
+});
+</script>
+#end
+
+#macro(rednumber $num)
+#if($num == "0" || $num == 0)
+<span class="greynumber-big">&nbsp;$num&nbsp;</span>
+#else
+<span class="rednumber-big">&nbsp;$num&nbsp;</span>
+#end
+#end
+
+#macro(save_computer_property $computer $prop $value)
+#set($_p=$properties.getComputerProperty($computer,$prop))
+#set($_p.value=$value)
+#set($_p.category="computer")
+#set($_result=$_p.save())
+#end
+
+#macro(computer_property $computer $prop)
+#set($_p=$properties.getComputerProperty($computer,$prop))
+$!_p.value#end
+
+#macro(computer_property_input $label $computer $prop)
+#set($_p=$properties.getComputerProperty($computer,$prop))
+<label>$label</label><input type="text" name="$prop" id="$prop" value="$!_p.value">#end
+
+#macro(js_error_handler)
+	function post_error_handler(jqXHR, textStatus, errorThrown) {
+		alert("AJAX POST Error:"+errorThrown);
+	}
+#end
+
+#macro(js_default_formatters)
+	function DiffCountFormatter(row, cell, value, columnDef, dataContext) {
+		if (value == null || value === "0" || value==0) {
+			return "&nbsp;-&nbsp";
+    		} else {
+      			return "<span style='color:white;background:#e05050;border-radius:8px'>&nbsp;" + value + "&nbsp;</span>";
+		}
+	}
+
+	function post_error_handler(jqXHR, textStatus, errorThrown) {
+		alert("AJAX POST Error:"+errorThrown);
+	}
+
+	function BulletFormatter(row,cell,value,columnDef,dataContext) {
+		return (value) ?  '<span class="ui-icon ui-icon-bullet" style="display:inline-block"></span>' : "";
+	}
+
+	function CheckmarkFormatter(row,cell,value,columnDef,dataContext) {
+		return (value) ?  '<span class="ui-icon ui-icon-check" style="display:inline-block"></span>' : "";
+	}
+
+#end
+
+#macro(js_search $name)
+	function updateFilter(search) {
+		var s = null;
+		if(search == "") {
+			s = null;	
+		} else {
+			s = new RegExp(search,'i');
+		}
+		dataView.setFilterArgs({
+			searchString: s });
+		dataView.refresh();
+		$('#counter').text(dataView.getLength());
+	}
+
+	function myFilter(item, args) {
+		var s = args.searchString;
+		if(s == "" || s == null) return true;
+		for(i=0;i<columns.length;i++) {
+			var key = columns[i]['field'];
+			if (typeof(item[key]) == "string" && item[key].match(s)) return true;
+		}
+		return false;
+	}
+#end

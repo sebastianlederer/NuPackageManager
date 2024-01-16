@@ -1,0 +1,16 @@
+#set ($factory=$repos)
+#set ($Integer = 0)
+#set ($obj=$factory.getById($Integer.parseInt($params.key)))
+#set ($filterByOwner=$request.isUserInRole($restricted_role))
+#if($params.profile)
+#set ($pro=$profile.getByName($params.profile))
+#if($pro.checkApprovals())
+#set ($r=$pro.updatePackageLists())
+#end
+#else
+#if(!$filterByOwner || $request.isUserInRole("$!obj.owner"))
+#set($obj.action='C')
+#set ($r=$factory.save($obj))
+#end
+#end
+#return_to_index("repos")

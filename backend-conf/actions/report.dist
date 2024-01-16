@@ -1,0 +1,1 @@
+dpkg-query --show -f '${db:Status-Abbrev} ${Package} ${Version} ${Architecture}\n' | awk '/^ii / { print   $2, $3, $4 }'

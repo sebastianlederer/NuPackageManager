@@ -1,0 +1,4 @@
+#set ($obj=$packagelists)
+#set ($r=$obj.load($params.key))
+#set ($r=$obj.copyFrom($obj.origin))
+#$response.sendRedirect("$root/packagelists/index.vm");

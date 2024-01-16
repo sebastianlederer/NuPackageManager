@@ -1,0 +1,27 @@
+#set ($layout="json.vm")
+#set ($dummy = $dbtool)
+#set ($Integer = 0)
+#set ($res=${response.setContentType("application/json")})
+#if($params.hostid)
+#else
+Nö
+#stop
+#end
+#set ($hostid = $Integer.parseInt($params.hostid))
+#set ($pkgs=$instpackages.getByHostId($hostid))
+#set ($count=$pkgs.size())
+[
+#set($first = true)
+#foreach ($p in $sorter.sort($pkgs,"name"))
+#set ($isDifferent = ($p.repoVersion && $p.localVersion != $p.repoVersion) || ($p.originVersion && $p.localVersion != $p.originVersion))
+#if (!$params.show || ($params.show == "updates" && $isDifferent))
+#if ($first)
+#set ($sep="")
+#set ($first=false)
+#else
+#set ($sep=",")
+#end
+$!sep{ "name": "$p.name", "version": "$p.localVersion", "repoVersion": "$!p.repoVersion", "originVersion": "$!p.originVersion", "arch": "$p.arch", "hostid": "$hostid" }
+#end
+#end
+]

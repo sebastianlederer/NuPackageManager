@@ -1,0 +1,108 @@
+#set ($layout = "grid.vm" )
+#set ($module = "packages")
+#set($disablebuttons=false)
+#if($params.show=='updates')
+#set($showupdates=true)
+#set($disablebuttons=true)
+#else
+#set($showupdates=false)
+#end
+#if($request.isUserInRole("packageadmin"))
+#set($isAdmin=true)
+#else
+#set($disablebuttons=true)
+#end
+#set($Integer = 0)
+#set($hostid = $Integer.parseInt($params.hostid))
+#set($host=$hosts.getById($hostid))
+#set ($title = "Pakete auf $host.name")
+#set($disable=$repo.pred == 0 || !$repo.checkApproval())
+	<!-- isAdmin $isAdmin showUpdates $showupdates -->
+	<SCRIPT type="text/javascript">
+
+	var grid;
+	var dataView;
+  	var columns = [
+		{id: "name", name: "Name", field: "name", cssClass: "mycell"},
+		{id: "version", name: "Version (installiert)", field: "version", cssClass: "mycell" },
+		{id: "repoVersion", name: "Version (Repo)", field: "repoVersion", cssClass: "mycell" },
+		{id: "originVersion", name: "Version (Ursprung)", field: "originVersion", cssClass: "mycell" },
+		{id: "arch", name: "Architektur", field: "arch", cssClass: "mycell" },
+	];
+
+	function enable_buttons(row) {
+		var o=dataView.getItem(row);
+		if(!o) return;
+
+		$('#button-update').button("option","disabled",$disable);
+		$('#button-updateall').button("option","disabled",$disable);
+	};
+
+
+	function radiobutton_handler() {
+		var updates=$('#showupdates').is(':checked');
+		if(updates)
+			show="&show=updates";
+		else
+			show="";
+		window.location="$root/instpackages/index.vm?hostid=${params.hostid}"+show;	
+	}
+
+	function post_error_handler(jqXHR, textStatus, errorThrown) {
+		alert("AJAX POST Error:"+errorThrown);
+	}
+
+	function updateFilter(search) {
+		dataView.setFilterArgs({
+			searchString: search });
+		dataView.refresh();
+	}
+
+	function myFilter(item, args) {
+		if (args.searchString != "" && item["name"].indexOf(args.searchString) == -1) {
+			return false;
+		}
+		return true;
+	}
+
+	$(document).ready(function () {
+
+#js_create_grid("columns")
+
+		grid.onSelectedRowsChanged.subscribe(function() {
+	   		row_ids = grid.getSelectedRows();
+			i=row_ids[0];
+			o=dataView.getItem(i);
+			if(!o) return;
+			enable_buttons(i);
+ 	  		console.log(row_ids);
+		});
+		grid.onDblClick.subscribe(function() { $("#button-edit").click(); });
+
+		$('#showupdates').click(radiobutton_handler);
+#js_dialog_simple("updateall","Alles aktualisieren","ui-icon-arrowreturnthick-1-n" $disable)
+#if($params.show=="updates")
+#set ($showinst="&show=updates")
+#end
+#js_searchbox()
+#js_load_data_key("instpackages","name","hostid=${params.hostid}$!showinst")
+		
+	});
+
+	</SCRIPT>
+<DIV class="ui-layout-center">
+</DIV>
+<DIV class="ui-layout-north">#parse("menu.vm")&nbsp;
+<span class="menu"><input class="menu" type="checkbox" name="showgroup" value="showupdates" #if($params.show=="updates") checked #end id="showupdates">
+nur Updates anzeigen</span>
+#taskstatus()
+#searchbox()
+<div id="ajaxBusy" class="ajaxBusy"><img class="ajaxBusy" src="$root/images/loading.gif"></div>
+</DIV>
+<DIV class="ui-layout-south">
+<div class="buttons">
+<button id="button-updateall">Alles aktualisieren</button>
+</div>
+</DIV>
+#parse("$module/updateall.inc")
+

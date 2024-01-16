@@ -1,0 +1,17 @@
+#set($module="hosts")
+#access_admin()
+#set ($Integer=0)
+#set ($obj=$hosts.getById($Integer.parseInt($params.key)))
+#set ($obj.description=$params.description)
+#set ($obj.ipAddress=$params.ipAddress)
+#set ($obj.macAddress=$params.macAddress)
+#set ($obj.options=$params.options)
+#if($params.profileName != "-")
+#set ($obj.profile=$profiles.getByName($params.profileName))
+#else
+#set ($obj.profile=$null)
+#end
+#if($hosts_editable)
+$hosts.save($obj)
+#end
+#return_to_index("$module")

@@ -1,0 +1,22 @@
+#set($module="hosts")
+#access_admin()
+#set ($Integer=0)
+#set ($obj=$hosts.getById($Integer.parseInt($params.key)))
+#set($action="")
+#if($params.action == "report")
+#set($action="R")
+#end
+#if($params.action == "config")
+#set($action="CR")
+#end
+#if($params.action == "update")
+#set($action="UR")
+#end
+#if($params.action == "reboot")
+#set($action="B")
+#end
+#set ($obj.action=$action)
+#if($hosts_editable)
+$hosts.save($obj)
+#end
+#return_to_index("$module")

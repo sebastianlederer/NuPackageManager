@@ -1,0 +1,6 @@
+bin
+downloads
+lib
+*.jar
+*.class
+*.zip

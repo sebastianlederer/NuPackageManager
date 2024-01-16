@@ -1,0 +1,14 @@
+[Unit]
+Description=Nupama embedded Tomcat
+After=network.target
+
+[Service]
+Type=forking
+User=nupama
+WorkingDirectory=/opt/dass-it/nupama/tomcat
+ExecStart=/usr/bin/ant -f nupama-tomcat.xml start
+ExecStop=/usr/bin/ant -f nupama-tomcat.xml stop
+
+[Install]
+# Start the service before we get to multi-user mode
+WantedBy=multi-user.target

@@ -1,0 +1,27 @@
+#set ($layout="json.vm")
+#set ($dummy = $dbtool)
+#set ($Integer = 0)
+#set ($res=${response.setContentType("application/json")})
+#if($params.repoid)
+#else
+Nö
+#stop
+#end
+#set ($repoid = $Integer.parseInt($params.repoid))
+#set ($pkgs=$packages.getByRepoId($repoid))
+#set ($count=$pkgs.size())
+[
+#set ($first=true)
+#foreach ($p in $sorter.sort($pkgs,"name"))
+#set ($isDifferent = ($p.version != $p.versionPred) || ($p.versionOrigin && ($p.versionOrigin != $p.version)))
+#if(!$params.show || ($params.show == "updates" && $isDifferent))
+#if ($first)
+#set ($sep="")
+#set ($first=false)
+#else
+#set ($sep=",")
+#end
+${sep}{ "id": $p.id, "name": "$p.name", "version": "$p.version", "versionPred": "$!p.versionPred", "versionOrigin": "$!p.versionOrigin", "description": "$!esc.java($p.description)", "arch": "$p.arch", "repoid": "$repoid" }
+#end
+#end
+]

@@ -1,0 +1,8 @@
+#access_admin()
+#set ($factory = $profiles)
+#set ($Integer = 0)
+#set ($obj=$factory.getById($Integer.parseInt($params.key)))
+#set ($obj.description = $!params.description)
+#set ($obj.configOpts = $!params.configOpts)
+$factory.save($obj)
+$response.sendRedirect("$root/profiles/index.vm")

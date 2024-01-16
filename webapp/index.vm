@@ -1,0 +1,59 @@
+<!-- $dbtool -->
+#set($layout='grid.vm')
+#set($module='overview.vm')
+#set($title='&Uuml;bersicht')
+## $response.sendRedirect("$root/packagelists/index.vm")
+#set($lists=$repos.getAll())
+#set($updates=0)
+#set($package_lists_with_updates=0)
+#foreach($l in $lists)
+#if($l.updateCount>0 || $l.updateCountOrigin>0)
+#set($package_lists_with_updates=$package_lists_with_updates+1)
+#if($l.updateCountOrigin > $l.updateCount)
+#set($updates = $updates + $l.updateCountOrigin)
+#else
+#set($updates = $updates + $l.updateCount)
+#end
+#end
+#end
+#set($systems_with_errors=0)
+#set($systems_with_updates=0)
+#set($comps=$hosts.getAll())
+#foreach($c in $comps)
+#if($c.result != "OK")
+#set($systems_with_errors=$systems_with_errors+1)
+#end
+#if($c.updateCount>0 || $c.updateCountOrigin>0)
+#set($systems_with_updates=$systems_with_updates+1)
+#end
+#end
+<script type="text/javascript">
+        $(document).ready(function () {
+#js_create_layout()
+	});
+</script>
+<DIV class="ui-layout-north">#parse("menu.vm")<br></DIV>
+<DIV class="ui-layout-center">
+<p class="overview">
+#rednumber($package_lists_with_updates) Repositories mit Updates<br>
+#rednumber($updates) verfügbare Updates insgesamt<br>
+<p class="overview">
+<span class="greynumber-big">&nbsp;$comps.size()&nbsp;</span> Systeme insgesamt<br>
+#rednumber($systems_with_updates) Systeme mit Updates<br>
+#rednumber($systems_with_errors) Systeme mit Fehlern<br>
+</p>
+<p class="overview">
+Task-Status:<br>
+#set($s=$status.defaultStatus)
+#if($s.task != "")
+<span class="greynumber-big">&nbsp; $s.progress &nbsp;</span>
+#end
+$s.task
+$s.message
+</p>
+</DIV>
+<DIV class="ui-layout-south">
+<div class="buttons">
+<span>&nbsp;</span>
+</div>
+</DIV>

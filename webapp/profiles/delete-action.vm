@@ -1,0 +1,7 @@
+#access_admin()
+#set( $Integer = 0)
+#set ($factory = $profiles)
+#set ($module = "profiles")
+#set ($obj = $factory.getById($Integer.parseInt($params.key)))
+$profiles.delete($obj)
+$response.sendRedirect("$root/$module/index.vm")

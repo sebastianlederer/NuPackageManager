@@ -1,0 +1,14 @@
+[Unit]
+Description=The background service for Nupama
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/nupamabackend.pid
+User=root
+ExecStart=/opt/dass-it/nupama/backend/ctl start
+ExecStop=/opt/dass-it/nupama//backend/ctl stop
+
+[Install]
+# Start the service before we get to multi-user mode
+WantedBy=multi-user.target

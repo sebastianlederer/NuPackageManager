@@ -1,0 +1,10 @@
+#access_approver()
+#set ($factory = $repos)
+#set ($Integer = 0)
+#set ($module = "repos")
+#set ($r = $factory.getById($Integer.parseInt($params.key)))
+#if ($r)
+#set($r.approved=true)
+#set($r = $factory.save($r))
+#end
+#return_to_index($module)

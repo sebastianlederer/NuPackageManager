@@ -1,0 +1,3 @@
+sudo gpg --no-default-keyring --keyring /etc/apt/keyrings/$repo.gpg --import <<EOF
+$pubkey
+EOF

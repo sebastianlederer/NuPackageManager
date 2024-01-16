@@ -1,0 +1,11 @@
+#set($layout="empty.vm")
+#set($name=$params.key)
+#set($password=$params.password)
+#if($name.matches("[-.A-Za-z0-9]+") && $password.matches("[-A-Za-z0-9,._$%/=]+"))
+#set($filename="puppet_offline_${name}.sh.gpg")
+#set($q='"')
+#set($r=$response.setHeader('Content-disposition',"attachment; filename=${q}$filename${q}"))
+#set($r=$response.setContentType("application/octet-stream"))
+$exec.pipe("sudo /usr/local/sbin/genconfig $name",$password)#else
+invalid hostname or password
+#end

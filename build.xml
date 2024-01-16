@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="build" name="nupama">
+  <property environment="env"/>
+  <property name="debuglevel" value="source,lines,vars"/>
+  <property name="target" value="11"/>
+  <property name="source" value="11"/>
+  <property file="build.properties"/>
+  <path id="nupama.classpath">
+    <pathelement location="bin"/>
+    <fileset dir="lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  <target name="init" depends="check-prepared,require-prepared">
+    <mkdir dir="bin"/>
+    <copy includeemptydirs="false" todir="bin">
+      <fileset dir="src">
+        <exclude name="**/*.launch"/>
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+  <target name="clean">
+    <delete dir="bin"/>
+    <delete dir="lib"/>
+    <delete dir="downloads"/>
+    <delete file="nupama.jar"/>
+    <delete file="nupama.zip"/>
+  </target>
+  <target depends="clean" name="cleanall"/>
+  <target depends="build-subprojects,build-project" name="build"/>
+  <target name="build-subprojects"/>
+  <target depends="init" name="build-project">
+    <echo message="${ant.project.name}: ${ant.file}"/>
+    <javac debug="true" includeantruntime="false" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+      <src path="src"/>
+      <classpath refid="nupama.classpath"/>
+    </javac>
+  </target>
+  <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+  <target name="jar" description="Create Jar file" depends="build">
+    <jar jarfile="nupama.jar" basedir="bin" includes="**/*.class"/>
+  </target>
+  <target name="install" description="Install webapp into tomcat directory" depends="jar,createinstalldir,install-tomcat,install-backend">
+    <property name="installprefix" value="${installdir}/tomcat/webapps/nupama"/>
+    <copy todir="${installprefix}">
+      <fileset dir="webapp">
+        <exclude name="**/tools.xml"/>
+      </fileset>
+    </copy>
+    <copy file="nupama.jar" todir="${installprefix}/WEB-INF/lib"/>
+    <copy todir="${installprefix}/WEB-INF/lib">
+      <fileset dir="lib">
+        <exclude name="javax.servlet-api*.jar"/>
+        <include name="*.jar"/>
+      </fileset>
+    </copy>
+  </target>
+  <target name="resolve" description="retrieve dependencies with Ivy">
+    <ivy:retrieve type="jar"/>
+  </target>
+  <target name="check-prepared">
+    <available property="prepared" file="lib" type="dir"/>
+  </target>
+  <target name="require-prepared" unless="${prepared}">
+    <fail message="Missing dependencies. Please call 'ant prepare-build' first."/>
+  </target>
+  <target name="downloads-create">
+    <mkdir dir="downloads"/>
+  </target>
+  <target name="fetch-tomcat" depends="downloads-create">
+    <get dest="downloads/${tomcat.file}">
+      <url url="${tomcat.urlbase}/${tomcat.file}"/>
+    </get>
+  </target>
+  <target name="check-tomcat">
+    <available property="tomcat.fetched" file="downloads/${tomcat.file}" type="file"/>
+  </target>
+  <target name="check-tomcat-installed">
+    <available property="tomcat.installed" file="${installdir}/tomcat/lib/tomcat-embed-core.jar" type="file"/>
+  </target>
+  <target name="require-tomcat" depends="check-tomcat" unless="${tomcat.fetched}">
+    <fail message="Missing embedded tomcat files. Please call 'ant fetch-tomcat' first."/>
+  </target>
+  <target name="createinstalldir">
+    <mkdir dir="${installdir}"/>
+    <mkdir dir="${installdir}/backend"/>
+    <mkdir dir="${installdir}/tomcat"/>
+    <copy todir="${installdir}/tomcat">
+      <fileset dir="tomcat-conf"/>
+      <fileset file="nupama-tomcat.properties"/>
+      <fileset file="nupama-tomcat.xml"/>
+    </copy>
+    <copy todir="${installdir}/conf">
+      <fileset dir="backend-conf">
+        <present present="srconly" targetdir="${installdir}/conf"/>
+      </fileset>
+    </copy>
+  </target>
+  <target name="install-tomcat" unless="tomcat.installed" depends="check-tomcat-installed,require-tomcat">
+    <unzip src="downloads/${tomcat.file}" dest="${installdir}/tomcat/lib"/>
+  </target>
+  <target name="install-backend" depends="createinstalldir">
+    <copy todir="${installdir}/backend">
+      <fileset dir="backend"/>
+      <fileset file="misc/ctl"/> 
+      <fileset file="misc/schedule"/> 
+    </copy>
+  </target>
+  <target name="prepare-build" depends="fetch-tomcat,resolve"/>
+  <target name="dist" depends="jar">
+    <zip destfile="nupama.zip">
+      <zipfileset dir="backend" prefix="nupama/backend"/>
+      <zipfileset file="misc/ctl" fullpath="nupama/backend/ctl" filemode="755"/>
+      <zipfileset file="misc/schedule" fullpath="nupama/backend/schedule" filemode="755"/>
+      <zipfileset dir="misc" prefix="nupama/misc" excludes="ctl,schedule"/>
+      <zipfileset dir="backend-conf" prefix="nupama/conf"/>
+      <zipfileset dir="tomcat-conf" prefix="nupama/tomcat"/>
+      <zipfileset dir="webapp" prefix="nupama/tomcat/webapps/nupama"/>
+      <zipfileset file="nupama.jar" prefix="nupama/tomcat/webapps/nupama/WEB-INF/lib"/>
+      <zipfileset dir="lib" excludes="javax.servlet-api*" prefix="nupama/tomcat/webapps/nupama/WEB-INF/lib"/>
+      <zipfileset src="downloads/${tomcat.file}" prefix="nupama/tomcat/lib"/>
+      <zipfileset file="nupama-tomcat.xml" fullpath="nupama/tomcat/nupama-tomcat.xml"/>
+      <zipfileset file="nupama-tomcat.properties" fullpath="nupama/tomcat/nupama-tomcat.properties.dist"/>
+    </zip> 
+  </target>
+
+  <include file="nupama-tomcat.xml"/>
+</project>

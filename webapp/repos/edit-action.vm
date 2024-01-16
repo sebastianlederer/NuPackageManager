@@ -1,0 +1,51 @@
+#access_admin()
+#set ($factory = $repos)
+#set ($Integer = 0)
+#set ($obj = $factory.getById($Integer.parseInt($params.key)))
+#set ($obj.owner = $params.owner)
+#set ($obj.description = $params.description)
+#if($obj.schedule != "-")
+#set ($obj.schedule = $params.schedule)
+#else
+#set($obj.schedule = $null)
+#end
+#if ($params.signingMode)
+#set ($obj.signingMode=true)
+#else
+#set ($obj.singingMode=false)
+#end
+#if ($params.atomic)
+#set ($obj.atomic=true)
+#else
+#set ($obj.atomic=false)
+#end
+#if ($params.approvalRequired)
+#set ($obj.approvalRequired=true)
+#else
+#set ($obj.approvalRequired=false)
+#end
+#if ($params.approved)
+#set ($obj.approved=true)
+#else
+#set ($obj.approved=false)
+#end
+#set($origin=$null)
+#if ($params.origin != "-")
+#set ($origin=$repos.getByName($params.origin))
+#end
+#set ($obj.origin=$origin)
+#set($pred=$null)
+#if ($params.pred != "-")
+#set ($pred=$repos.getByName($params.pred))
+#set ($obj.pred=$pred)
+#else
+#set ($obj.pred=$null)
+#end
+#set ($up = $null)
+#if($params.upstream != "-")
+#set ($up=$upstream.getByName($params.upstream))
+#end
+#set ($obj.upstream=$up)
+##set ($obj.action="R")
+$repos.save($obj)
+#return_to_index("repos")

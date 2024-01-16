@@ -1,0 +1,20 @@
+<div>
+<span class="menuheader"><img src="$root/images/bomb.png">Fehler</span>
+</div>
+<p>
+Es ist ein Fehler aufgetreten. <br> 
+<p>
+Mögliche Ursachen sind:
+<ul>
+<li>Fehlende Eingaben bei Pflichtfeldern
+<li>Falsche Eingaben wie doppelt vorkommende Namen
+<li>Löschen von Objekten, die an anderer Stelle noch referenziert werden
+<li>Probleme beim Zugriff auf die Datenbank
+</ul>
+Bitte verwenden Sie den <em>Zurück</em>-Button des Browsers, um zur vorherigen Ansicht zu gelangen. Ziehen Sie gegebenenfalls einen Administrator zu Rate.
+<p>
+Es folgt der vom Server gemeldete Fehlertext:
+<div class="error">
+$error_cause
+</div>
+$response.setStatus(400)

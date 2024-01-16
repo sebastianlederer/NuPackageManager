@@ -1,0 +1,10 @@
+#access_admin()
+#set ($module = "profiles")
+#set ($Integer = 0)
+#set ($p = $profiles.getById($Integer.parseInt($params.key)))
+#if( $params.reponame != "null")
+#set ($r = $repos.getByName($params.reponame))
+#if ($r)
+$profilerepos.addRepoToProfile($r,$p)
+#end
+#end

@@ -1,0 +1,3 @@
+#set($layout="json.vm")
+#set($s=$status.defaultStatus)
+{ "task": "$s.task", "progress": "$s.progress", "message": "$s.message" }

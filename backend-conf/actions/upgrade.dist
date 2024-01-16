@@ -1,0 +1,2 @@
+sudo DEBIAN_FRONTEND=noninteractive apt update -y
+sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y -o pkg::Options::="--force-confold"

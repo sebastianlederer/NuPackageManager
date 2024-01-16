@@ -1,0 +1,11 @@
+<Context path="/nupama">
+  <Resource name="jdbc/DbConnection"
+            auth="Container"
+            type="javax.sql.DataSource"
+            username="nupama"
+            password="nupama"
+            driverClassName="org.postgresql.Driver"
+            url="jdbc:postgresql://localhost/nupama"
+            maxActive="8"
+            maxIdle="1"/>
+</Context>

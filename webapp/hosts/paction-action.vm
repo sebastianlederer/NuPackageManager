@@ -1,0 +1,25 @@
+#set($module="hosts")
+#access_admin()
+#set ($Integer=0)
+#set ($pro=$profiles.getByName($params.actionProfile))
+#set ($hostlist=$hosts.getByProfile($pro))
+#set ($action="")
+#if($params.action == "report")
+#set($action="R")
+#end
+#if($params.action == "config")
+#set($action="CR")
+#end
+#if($params.action == "update")
+#set($action="UR")
+#end
+#if($params.action == "reboot")
+#set($action="B")
+#end
+#if($hosts_editable)
+#foreach($obj in $hostlist)
+#set($obj.action=$action)
+$hosts.save($obj)
+#end
+#end
+#return_to_index("$module")

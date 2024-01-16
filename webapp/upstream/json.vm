@@ -1,0 +1,21 @@
+#set ($layout="json.vm")
+#set ($dummy = $dbtool)
+#set ($res=${response.setContentType("application/json")})
+#if($params.key)
+#set ($r=$upstream.getByName($params.key))
+#set ($repolist=[ $r ])
+#{else}[
+#set ($repolist=$upstream.getAll())
+#end
+#set ($count=$repolist.size())
+#foreach ($r in $sorter.sort($repolist,"name"))
+#if ($count!=$foreach.count)
+#set ($sep=",")
+#else
+#set ($sep="")
+#end
+{ "id": $r.id, "name": "$r.name", "description": "$!r.description", "type": "$!r.type", "url": "$r.url", "dist": "$!r.dist", "arch": "$!r.arch", "component": "$!r.component", "pubkey": "$!esc.java($r.pubkey)" }$!sep
+#end
+#if(!$params.key)
+]
+#end

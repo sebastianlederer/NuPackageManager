@@ -1,0 +1,31 @@
+<project basedir="." default="check-status" name="nupama-tomcat">
+  <property file="nupama-tomcat.properties"/>
+  <path id="tomcat.class.path">
+    <fileset dir="${server.location}/${server.name}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+  <target name="start">
+    <echo>Start Tomcat</echo>
+    <java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="true" classpathref="tomcat.class.path">
+      <jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"/>
+      <jvmarg value="-Dcatalina.home=${server.location}/${server.name}"/>
+      <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=info"/>
+      <jvmarg value="-Djavax.net.ssl.trustStore=${server.truststore.file}"/>
+      <jvmarg value="-Djavax.net.ssl.trustStorePassword=${server.truststore.password}"/>
+    </java>
+  </target>
+  <target name="stop" depends="check-status" if="tomcat.started">
+    <echo>Stop Tomcat</echo>
+    <java classname="org.apache.catalina.startup.Bootstrap" fork="true" classpathref="tomcat.class.path">
+      <jvmarg value="-Dcatalina.home=${server.location}/${server.name}"/>
+      <arg line="stop"/>
+    </java>
+    <sleep seconds="5"/>
+  </target>
+  <target name="check-status">
+    <condition property="tomcat.started">
+      <socket server="localhost" port="8000"/>
+    </condition>
+  </target>
+</project>

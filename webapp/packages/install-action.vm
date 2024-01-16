@@ -1,0 +1,6 @@
+#set ($layout="empty.vm")
+#set ($p=$packages)
+#set ($r=$p.load($params.p))
+#set ($p.install=true)
+#set ($r=$p.save())
+#set ($r=$p.getPackageList().removeApproval())

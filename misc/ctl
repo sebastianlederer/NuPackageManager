@@ -1,0 +1,43 @@
+#!/bin/sh
+prg=nupamabackend
+LANG=de_DE.UTF-8
+export PATH LANG
+unset LC_ALL LC_MESSAGES
+
+cd $(dirname $0)
+
+if [ -r /var/run/$prg.pid ]
+then
+  oldpid=$(cat /var/run/$prg.pid)
+  if kill -0 $oldpid 2>/dev/null
+  then
+	status="pid $oldpid is running"
+	exitcode=0
+  else
+	status="pid $oldpid is not running"
+	exitcode=1
+  fi
+else
+	status="no pidfile found"
+	exitcode=1
+fi
+
+if [ "$1" = "status" ]
+then
+	echo $status
+	exit $exitcode
+fi
+
+if [ "$exitcode" = 0 ]
+then
+	kill $oldpid
+	sleep 3
+fi
+
+if [ "$1" = "stop" ]
+then
+	exit 0
+fi
+
+exec setsid python3 -u nupamabackend.py watch >>/var/log/$prg.log </dev/null 2>&1 &
+echo $! >/var/run/$prg.pid

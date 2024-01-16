@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<HTML>
+<HEAD>
+	<TITLE>$!title</TITLE>
+	<link rel="stylesheet" href="$root/css/examples.css" type="text/css"/> 
+	<link rel="stylesheet" href="$root/css/ui-lightness/jquery-ui.css"> 
+	<LINK type="text/css" rel="stylesheet" href="$root/css/main.css">
+
+	<SCRIPT type="text/javascript" src="$root/js/jquery-latest.js"></SCRIPT>
+	<SCRIPT type="text/javascript" src="$root/js/jquery.ui.min.js"></SCRIPT>
+	<SCRIPT type="text/javascript" src="$root/js/jquery.layout-latest.js"></SCRIPT>
+	<SCRIPT type="text/javascript" src="$root/js/jquery.event.drag-2.2.js"></SCRIPT>
+	<SCRIPT type="text/javascript" src="$root/js/jquery.event.drag.live-2.2.js"></SCRIPT>
+</HEAD>
+<BODY>
+$screen_content
+</BODY>
+</HTML>

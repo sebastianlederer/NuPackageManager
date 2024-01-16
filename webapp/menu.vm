@@ -1,0 +1,7 @@
+#set($dummy=$dbtool)
+<a class="menubutton" href="$root/index.vm">Übersicht</a
+><a class="menubutton" href="$root/repos/index.vm">Repositories</a
+><a class="menubutton" href="$root/upstream/index.vm">Upstream</a
+><a class="menubutton" href="$root/profiles/index.vm">Profile</a
+><a class="menubutton" href="$root/hosts/index.vm">Hosts</a>
+<h1 class="menuheader">$title</h1>

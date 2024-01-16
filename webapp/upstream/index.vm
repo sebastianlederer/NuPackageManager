@@ -1,0 +1,65 @@
+#set ($layout = "grid.vm" )
+#set ($title = "Upstream-Repositories")
+#set ($module = "upstream")
+#if($request.isUserInRole("packageadmin"))
+#set($disablebuttons=false)
+#else
+#set($disablebuttons=true)
+#end
+	<SCRIPT type="text/javascript">
+
+#js_default_formatters()
+#js_search("name")
+
+	var grid;
+	var dataView;
+
+  	var columns = [
+		{id: "name", name: "Name", field: "name", cssClass: "mycell"},
+		{id: "type", name: "Typ", field: "type", cssClass: "mycell" },
+		{id: "dist", name: "Distribution", field: "dist", cssClass: "mycell"}, 
+		{id: "component", name: "Komponente", field: "component", cssClass: "mycell"}, 
+		{id: "arch", name: "Architektur", field: "arch", cssClass: "mycell"}, 
+	];
+
+	$(document).ready(function () {
+
+#js_create_grid("columns")
+#if(!$disablebuttons)
+		grid.onSelectedRowsChanged.subscribe(function() { 
+			$("#button-edit").button("option","disabled",false);
+			$("#button-rename").button("option","disabled",false);
+			$("#button-delete").button("option","disabled",false);
+
+	   		row_ids = grid.getSelectedRows();
+ 	  		console.log(row_ids);
+		});
+#end
+		grid.onDblClick.subscribe(function() { $("#button-edit").click(); });
+#js_dialog_form("new" "Create" "ui-icon-plus" $disablebuttons false)
+#js_dialog_form("edit" "Save" "ui-icon-pencil" true false)
+#js_dialog_form("rename" "Rename" "ui-icon-tag" true false)
+#js_dialog_form("delete" "Delete" "ui-icon-minus" true false)
+
+#js_searchbox()
+
+#js_load_data($module,"name")
+	});
+
+	</SCRIPT>
+<DIV class="ui-layout-center">
+</DIV>
+<DIV class="ui-layout-north">#parse("menu.vm") #taskstatus() #searchbox()</DIV>
+<DIV class="ui-layout-south">
+<div class="buttons">
+<button id="button-new">Neu</button>
+<button id="button-edit">Bearbeiten</button>
+<button id="button-rename">Umbenennen</button>
+<button id="button-delete">Löschen</button>
+</div>
+</DIV>
+#parse("$module/new.inc")
+#parse("$module/edit.inc")
+#parse("$module/rename.inc")
+#parse("$module/delete.inc")
+

@@ -1,0 +1,9 @@
+<HTML>
+<HEAD>
+<TITLE>$!title</TITLE>
+<LINK type="text/css" rel="stylesheet" href="/PackageManager/css/main.css">
+</HEAD>
+<BODY>
+$screen_content
+</BODY>
+</HTML>

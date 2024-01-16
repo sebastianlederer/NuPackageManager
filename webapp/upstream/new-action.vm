@@ -1,0 +1,4 @@
+#access_admin()
+#set($module="upstream")
+#set($form_action="new")
+#parse("$module/save-action.inc")

@@ -1,0 +1,173 @@
+#set ($layout = "grid.vm" )
+#set ($module = "repos" )
+#set ($title = "Repositories")
+#set ($disablenew=false)
+#if($params.profile)
+#set($Integer = 0)
+#set($profileid = $Integer.parseInt($params.profile))
+#set($viaprofile=true)
+#set($profile=$profiles.getById($profileid))
+#else
+#set($viaprofile=false)
+#end
+#if ($viaprofile)
+#set ($title = "$title für Profil $profile.name")
+#set($disablenew=true)
+#set($disablebuttons=true)
+#end
+#if($request.isUserInRole("packageadmin"))
+#set($disableapproval=false)
+#else
+#set($disableapproval=true)
+#end
+#if($request.isUserInRole("packageadmin"))
+#set($disablebuttons=false)
+#else
+#set($disablebuttons=true)
+#set($disablenew=true)
+#end
+	<SCRIPT type="text/javascript">
+
+	function post_error_handler(jqXHR, textStatus, errorThrown) {
+		alert("AJAX POST Error:"+errorThrown);
+	}
+
+	function IndentFormatter(row, cell, value, columnDef, dataContext) {
+		var spacer = "<span style='display:inline-block;height:1px;width:" + (2 * dataContext["indent"]) + "em'></span>";
+		return spacer + value;	
+	}
+
+	function DiffCountFormatter(row, cell, value, columnDef, dataContext) {
+		if (value == null || value === "0" || value==0) {
+			return "&nbsp;-&nbsp";
+    		} else {
+      			return "<span style='color:white;background:#e05050;border-radius:8px'>&nbsp;" + value + "&nbsp;</span>";
+		}
+	}
+
+	function BulletFormatter(row,cell,value,columnDef,dataContext) {
+		return (value) ?  '<span class="ui-icon ui-icon-bullet" style="display:inline-block"></span>' : "";
+	}
+
+	function CheckmarkFormatter(row,cell,value,columnDef,dataContext) {
+		return (value) ?  '<span class="ui-icon ui-icon-check" style="display:inline-block"></span>' : "";
+	}
+
+#js_search()
+
+	var grid;
+  	var columns = [
+		{id: "name", name: "Name", field: "name", cssClass: "mycell", formatter: IndentFormatter},
+		{id: "approved", name: "Freigegeben", field: "approved", cssClass: "mycell", formatter: CheckmarkFormatter},
+		{id: "pred", name: "Vorg&auml;nger", field: "pred", cssClass: "mycell" },
+		{id: "upd_count", name: "Updates (Vorgänger)", field: "upd_count", cssClass: "mycell", formatter: DiffCountFormatter}, 
+		{id: "upd_count_origin", name: "Updates (Ursprung)", field: "upd_count_origin", cssClass: "mycell", formatter: DiffCountFormatter}, 
+		{id: "schedule", name: "Zeitplan", field: "schedule", cssClass: "mycell" },
+		{id: "lastUpdate", name: "Aktualisiert", field: "lastUpdate", cssClass: "mycell" },
+		{id: "repoid", name: "ID", field: "repoid", cssClass: "mycell" },
+	];
+
+	$(document).ready(function () {
+
+#js_create_grid("columns")
+
+		grid.onSelectedRowsChanged.subscribe(function() { 
+			let something_selected=false;
+			let disable_update=true;
+			let approved=false;
+			let enable_mirror=false;
+	   		row_ids = grid.getSelectedRows();
+			if(row_ids.length > 0) {
+				var o = dataView.getItem(row_ids[0]);
+				something_selected=true;
+
+				// determine if origin package list has been approved
+				if(o.pred_id!=null) {
+					let pred=null;
+					pred=dataView.getItemById(o.pred_id);
+					if(pred) {
+						console.log(pred.name + " " + pred.approvalRequired + " " + pred.approved)
+						disable_update = o.pred==null || (o.approvalRequired==true && pred.approved==false)
+					}
+				}
+				enable_mirror=(o.upstream != null && o.upstream != "") ;
+			}
+#if(!$disablebuttons)
+			$("#button-edit").button("option","disabled", something_selected==false);
+			$("#button-rename").button("option","disabled", something_selected==false);
+			$("#button-delete").button("option","disabled", something_selected==false);
+#end
+			$("#button-view").button("option","disabled", something_selected==false);
+#if(!$disableapproval)
+			$("#button-approve").button("option","disabled",
+				something_selected==false || approved==true);
+#end
+			$("#button-update").button("option","disabled", disable_update);
+			$("#button-mirror").button("option","disabled", enable_mirror==false);
+		});
+		grid.onDblClick.subscribe(function() { $("#button-view").click(); });
+#js_dialog_form("new" "Create" "ui-icon-plus" $disablenew false)
+#js_dialog_form("edit" "Save" "ui-icon-pencil" true false)
+#js_dialog_form("rename" "Rename" "ui-icon-tag" true false)
+#js_dialog_form("delete" "Delete" "ui-icon-minus" true false)
+
+#if($viaprofile)
+#if($profile.checkApprovals())
+#set($disable=false)
+#else
+#set($disable=true)
+#end
+#else
+#set($disable=true)
+#end
+#js_dialog_simple("approve","Freigeben", "ui-icon-check" true)
+#js_dialog_simple("update","Aktualisieren", "ui-icon-arrowreturnthick-1-n" true) 
+#js_dialog_simple("mirror","Jetzt spiegeln", "ui-icon-arrowthickstop-1-s" true)
+
+		$("#button-view").button({disabled: true, icons:{ primary: "ui-icon-zoomin"}})
+			.click(function() {
+				var row=grid.getSelectedRows()[0];
+				var item=dataView.getItem(row);
+				var name=item.name;
+				var updates=item.diffcount;
+				var newLocation="$root/packages/index.vm?repoid="+item.id;
+				if(updates>0) newLocation += "&show=updates";
+				window.location=newLocation;
+				});
+#js_searchbox()
+#if($viaprofile)
+#js_load_data_key("repos","id","profile=$params.profile")
+#else
+#js_load_data("repos","id")
+#end
+	});
+
+	</SCRIPT>
+<DIV class="ui-layout-center">
+</DIV>
+<DIV class="ui-layout-north">#parse("menu.vm")#taskstatus() #searchbox()</DIV>
+<DIV class="ui-layout-south">
+<div class="buttons">
+<button id="button-new">Neu</button>
+<button id="button-edit">Bearbeiten</button>
+<button id="button-rename">Umbenennen</button>
+<button id="button-delete">L&ouml;schen</button>
+<span>&nbsp;</span>
+<button id="button-approve">Freigeben</button>
+<button id="button-view">Pakete anzeigen</button>
+#if($viaprofile)
+<button id="button-update">Alles aktualisieren</button>
+#else
+<button id="button-update">Aktualisieren</button>
+#end
+<button id="button-mirror">Jetzt spiegeln</button>
+</div>
+</DIV>
+#parse("$module/new.inc")
+#parse("$module/edit.inc")
+#parse("$module/rename.inc")
+#parse("$module/delete.inc")
+#parse("$module/approve.inc")
+#parse("$module/update.inc")
+#parse("$module/mirror.inc")
+

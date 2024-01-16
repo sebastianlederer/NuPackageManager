@@ -1,0 +1,22 @@
+#set ($layout="json.vm")
+#set ($dummy = $dbtool)
+#set ($res=${response.setContentType("application/json")})
+#if($params.key)
+#set ($res=$profiles.getById($params.key))
+#set ($pros=[ $res ])
+#{else}[
+#set ($pros=$profiles.getAll())
+#end
+#set ($count=$pros.size())
+#foreach ($pr in $sorter.sort($pros,"name"))
+#if ($count!=$foreach.count)
+#set ($sep=",")
+#else
+#set ($sep="")
+#end
+#set($rps=$profilerepos.getReposFromProfile($pr))
+{ "id": $pr.id, "name": "$pr.name", "owner": "$!pr.owner", "description": "$!pr.description", "configOpts": "$!pr.configOpts", "repos": [#foreach($rp in $rps) "$rp.name"#if ($foreach.count!=$rps.size()),#{end}#{end} ] }$!sep
+#end
+#if(!$params.key)
+]
+#end

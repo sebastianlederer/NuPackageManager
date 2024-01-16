@@ -1,0 +1,17 @@
+#set ($obj=$packages)
+#set ($r=$obj.load($params.key))
+#if($params.show=='updates')
+#set ($pl=$packagelists)
+#set ($r=$pl.load($params.list))
+#set ($obj=$pl.getPackageToUpdate($obj.id))
+#else
+#set ($pl=$obj.getPackageList())
+#end
+#set($filterByOwner=$request.isUserInRole($restricted_role))
+#if(!$filterByOwner || $request.isUserInRole("$!pl.owner"))
+#if($pl.checkApproval())
+#set ($r=$obj.updateFrom($pl.origin))
+#set ($r=$pl.removeApproval())
+#end
+#end
+#return_to_index("packages")

@@ -1,0 +1,4 @@
+03 20 * * *	nupama	/opt/dass-it/nupama/backend/schedule report
+05 20 * * *	nupama	/opt/dass-it/nupama/backend/schedule daily
+05 18 * * Sun	nupama	/opt/dass-it/nupama/backend/schedule weekly
+05 20 1 * *	nupama	/opt/dass-it/nupama/backend/schedule monthly

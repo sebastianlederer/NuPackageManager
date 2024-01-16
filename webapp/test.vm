@@ -1,0 +1,4 @@
+#set ($layout="empty.vm")
+$dbtool
+<br>
+$request.getContextPath()

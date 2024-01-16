@@ -1,0 +1,113 @@
+#set ($layout = "grid.vm" )
+#set ($title = "Profile")
+#set ($module = "profiles")
+#if ($request.isUserInRole("packageadmin"))
+#set ($profile_admin=true)
+#set ($disable_flag=false)
+#else
+#set ($disable_flag=true)
+#end
+	<SCRIPT type="text/javascript">
+
+#js_search("name")
+
+	function DiffCountFormatter(row, cell, value, columnDef, dataContext) {
+		if (value == null || value === "0" || value==0) {
+			return "&nbsp;-&nbsp";
+    		} else {
+      			return "<span style='color:white;background:#e05050;border-radius:8px'>&nbsp;" + value + "&nbsp;</span>";
+		}
+	}
+
+	function post_error_handler(jqXHR, textStatus, errorThrown) {
+		alert("AJAX POST Error:"+errorThrown);
+	}
+
+	function BulletFormatter(row,cell,value,columnDef,dataContext) {
+		return (value) ?  '<span class="ui-icon ui-icon-bullet" style="display:inline-block"></span>' : "";
+	}
+
+	function CheckmarkFormatter(row,cell,value,columnDef,dataContext) {
+		return (value) ?  '<span class="ui-icon ui-icon-check" style="display:inline-block"></span>' : "";
+	}
+
+	var grid;
+	var dataView;
+
+  	var columns = [
+		{id: "name", name: "Name", field: "name", cssClass: "mycell"},
+		{id: "description", name: "Beschreibung", field: "description", cssClass: "mycell" },
+	];
+
+	$(document).ready(function () {
+
+#js_create_grid("columns")
+
+		grid.onSelectedRowsChanged.subscribe(function() { 
+#if($profile_admin)
+			$("#button-edit").button("option","disabled",false);
+			$("#button-rename").button("option","disabled",false);
+			$("#button-delete").button("option","disabled",false);
+#end
+#if(false)
+			$("#button-view").button("option","disabled",false);
+#end
+#if($properties_button)
+			$("#button-properties").button("option","disabled",false);
+#end
+
+
+	   		row_ids = grid.getSelectedRows();
+ 	  		console.log(row_ids);
+		});
+		grid.onDblClick.subscribe(function() { $("#button-edit").click(); });
+
+#js_dialog_form("new" "Create" "ui-icon-plus" $disable_flag false)
+#js_dialog_form("edit" "Save" "ui-icon-pencil" true false)
+#js_dialog_form("rename" "Rename" "ui-icon-tag" true false)
+#js_dialog_form("delete" "Delete" "ui-icon-minus" true false)
+#if(false)
+		$("#button-view").button({disabled: true, icons:{ primary: "ui-icon-zoomin"}})
+			.click(function() {
+				var row=grid.getSelectedRows()[0];
+				var name=dataView.getItem(row).id;
+				window.location="$root/repos/index.vm?profile="+name;
+				});
+#end
+#if($properties_button)
+	$("#button-properties").button({disabled: true, icons:{ primary: "ui-icon-gear"}})
+			.click(function() {
+				var row=grid.getSelectedRows()[0];
+				var item=dataView.getItemByIdx(row);
+				var name=item.id;
+				var newLocation="$root/properties/index.vm?profile="+name;
+				window.location=newLocation;
+				});
+#end
+#js_searchbox()
+#js_load_data("profiles","id")
+
+	});
+
+	</SCRIPT>
+<DIV class="ui-layout-center">
+</DIV>
+<DIV class="ui-layout-north">#parse("menu.vm") #taskstatus() #searchbox()</DIV>
+<DIV class="ui-layout-south">
+<div class="buttons">
+<button id="button-new">Neu</button>
+<button id="button-edit">Bearbeiten</button>
+<button id="button-rename">Umbenennen</button>
+<button id="button-delete">Löschen</button>
+<span>&nbsp;</span>
+<!-- <button id="button-view">Paketlisten</button> -->
+#if($properties_button)
+<button id="button-properties">Attribute</button>
+#end
+</div>
+</DIV>
+#parse("profiles/new.inc")
+#parse("profiles/edit.inc")
+#parse("profiles/rename.inc")
+#parse("profiles/delete.inc")
+

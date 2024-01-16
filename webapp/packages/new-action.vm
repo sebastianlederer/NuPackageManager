@@ -1,0 +1,4 @@
+#access_admin()
+#set($form_action="new")
+#set($module="packages")
+#parse("$module/save-action.inc")

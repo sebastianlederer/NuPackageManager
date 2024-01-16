@@ -1,0 +1,137 @@
+#set ($layout = "grid.vm" )
+#set ($title = "Hosts")
+#set ($module = "hosts")
+#if ($request.isUserInRole("packageadmin"))
+#set ($computer_admin=true)
+#set ($disable_flag=false)
+#else
+#set ($disable_flag=true)
+#end
+	<SCRIPT type="text/javascript">
+
+#js_default_formatters()
+#js_error_handler()
+#js_search("name")
+
+	var grid;
+	var dataView;
+
+  	var columns = [
+		{id: "name", name: "Name", field: "name", cssClass: "mycell"},
+		{id: "description", name: "Beschreibung", field: "description", cssClass: "mycell" },
+		{id: "profileName", name: "Profil", field: "profileName", cssClass: "mycell" },
+		{id: "ipAddress", name: "IP-Adresse", field: "ipAddress", cssClass: "mycell" },
+	/*	{id: "macAddress", name: "MAC-Adresse", field: "macAddress", cssClass: "mycell" }, */
+		{id: "action", name: "Aktion", field: "action", cssClass: "mycell" },
+		{id: "result", name: "Status", field: "result", cssClass: "mycell" },
+		{id: "updateCount", name: "Updates", field: "updateCount", cssClass: "mycell", formatter: DiffCountFormatter },
+		{id: "updateCountOrigin", name: "Updates (Ursprung)", field: "updateCountOrigin", cssClass: "mycell", formatter: DiffCountFormatter },
+	];
+
+	$(document).ready(function () {
+
+#js_create_grid("columns")
+
+#if($hosts_editable)
+		grid.onSelectedRowsChanged.subscribe(function() { 
+#if($computer_admin)
+			$("#button-edit").button("option","disabled",false);
+#if($properties_button)
+			$("#button-properties").button("option","disabled",false);
+#end
+#if($certificate_button)
+			$("#button-certificate").button("option","disabled",false);
+#end
+#if($config_button)
+			$("#button-config").button("option","disabled",false);
+#end
+			$("#button-rename").button("option","disabled",false);
+			$("#button-delete").button("option","disabled",false);
+#end
+			$("#button-view").button("option","disabled",false);
+			$("#button-action").button("option","disabled",false);
+
+	   		row_ids = grid.getSelectedRows();
+ 	  		console.log(row_ids);
+		});
+		grid.onDblClick.subscribe(function() { $("#button-view").click(); });
+
+#js_dialog_form("new" "Create" "ui-icon-plus" $disable_flag false)
+#js_dialog_form("edit" "Save" "ui-icon-pencil" true false)
+#if($properties_button)
+                $("#button-properties").button({disabled: true, icons:{ primary: "ui-icon-gear"}})
+                        .click(function() {
+                                var row=grid.getSelectedRows()[0];
+                                var item=dataView.getItem(row);
+                                var name=item.name;
+                                var newLocation="$root/properties/index.vm?computer="+name;
+                                window.location=newLocation;
+                                });
+#end
+		$("#button-view").button({disabled: true, icons:{ primary: "ui-icon-zoomin"}})
+			.click(function() {
+				var row=grid.getSelectedRows()[0];
+				var item=dataView.getItem(row);
+				var name=item.name;
+				var updates=item.diffcount;
+				var newLocation="$root/instpackages/index.vm?hostid="+item.id;
+				if(updates>0) newLocation += "&show=updates";
+				window.location=newLocation;
+				});
+#js_dialog_form("action","Aktion","ui-icon-play" true false true)
+#js_dialog_form("paction","Profil-Aktion","ui-icon-seek-next" false false true)
+#js_dialog_form("rename" "Rename" "ui-icon-tag" true false)
+#js_dialog_form("delete" "Delete" "ui-icon-minus" true false)
+#js_searchbox()
+
+#end
+
+#js_load_data($module,"name")
+
+	});
+
+	</SCRIPT>
+<DIV class="ui-layout-center">
+</DIV>
+<DIV class="ui-layout-north">#parse("menu.vm")
+#taskstatus()
+#searchbox()
+</DIV>
+<DIV class="ui-layout-south">
+<div class="buttons">
+#if ($hosts_editable)
+<button id="button-new">Neu</button>
+<button id="button-edit">Bearbeiten</button>
+<button id="button-rename">Umbenennen</button>
+<button id="button-delete">Löschen</button>
+<span>&nbsp;</span>
+<button id="button-view">Pakete anzeigen</button>
+#end
+#if($config_button)
+<button id="button-config">Konfiguration</button>
+#end
+#if($properties_button)
+<button id="button-properties">Attribute</button>
+#end
+#if($certificate_button)
+<button id="button-certificate">Zertifikat</button>
+#end
+<span>&nbsp;</span>
+<button id="button-action">Aktion</button>
+<button id="button-paction">Profil-Aktion</button>
+</div>
+</DIV>
+#if($hosts_editable)
+#parse("$module/new.inc")
+#parse("$module/edit.inc")
+#parse("$module/rename.inc")
+#parse("$module/delete.inc")
+#end
+#if($config_button)
+#parse("$module/config.inc")
+#end
+#if($certificate_button)
+#parse("$module/certificate.inc")
+#end
+#parse("$module/action.inc")
+#parse("$module/paction.inc")

@@ -1,0 +1,9 @@
+#access_admin()
+#set ($obj = $repos)
+#set ($module = "repos")
+#set ($r = $obj.load($params.key))
+#set ($repo = $repositories)
+#set ($r = $repo.loadBy("name", $params.repo))
+#if ($r)
+$obj.addRepository($repo)
+#end

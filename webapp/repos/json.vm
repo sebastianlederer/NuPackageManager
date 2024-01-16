@@ -1,0 +1,45 @@
+#set ($layout="json.vm")
+#set ($dummy = $dbtool)
+#set ($Integer = 0)
+#set ($res=${response.setContentType("application/json")})
+#if($params.key)
+#set ($rs=$repos)
+#set ($res=$rs.getByName($params.key))
+#set ($lists=[ $rs ])
+#{else}[
+#if($params.profile)
+#set ($p=$profiles.getById($Integer.parseInt($params.profile)))
+#set ($lists=$repos.getAllByProfile($p))
+#set ($lists=$sorter.sort($lists,"name"))
+#else
+#set ($lists=$repos.getTree())
+#end
+#end
+#set($user=$request.remoteUser)
+#set($filterByOwner=$request.isUserInRole($restricted_role))
+#set($first=true)
+#foreach ($rs in $lists)
+#set ($origin_pl = [])
+#set ($origin_pl = $pl.originPackageList)
+#if (!$origin_pl.name)
+#set ($origin="null")
+#else
+#set ($origin='"'+"$origin_pl.name"+'"')
+#end
+#if(!$filterByOwner || ($rs.owner == $user || $request.isUserInRole("$rs.owner")))
+#if ($first)
+#set ($sep="")
+#set ($first=false)
+#else
+#set ($sep=",")
+#end
+#set($pred_id=$rs.pred.id)
+#if(!$pred_id)
+#set($pred_id="null")
+#end
+$!sep{ "id": $rs.id, "name": "$rs.name", "description": "$!rs.description", "pred": "$!rs.pred.name", "origin": "$!rs.origin.name", "schedule": "$!rs.schedule", "lastUpdate": "$!rs.lastUpdate", "owner": "$!rs.owner", "approvalRequired": $rs.approvalRequired, "approved": $rs.approved, "atomic": $rs.atomic, "upd_count": $rs.updateCount, "upd_count_origin": $rs.updateCountOrigin, "upstream": "$!rs.upstream.name", "signingmode": $rs.signingMode, "action": "$!rs.action", "result": "$!rs.result", "pred_id": $pred_id, "indent": $rs.indent, "repoid": "$rs.id" }
+#end
+#end
+#if(!$params.key)
+]
+#end

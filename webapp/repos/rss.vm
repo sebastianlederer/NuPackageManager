@@ -1,0 +1,30 @@
+#set ($layout="empty.vm")
+#set ($dummy = $dbtool)
+#if($params.key)
+#set ($res=${response.setContentType("application/rss-xml")})
+#set ($pl=$repos)
+#set ($res=$pl.load($params.key))
+#set ($pkgs=$pl.diffPackages($pl.origin))
+#{else}
+crap
+#stop
+#end
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+        <title>Updates for package list $pl.name</title>
+        <description>Updates for package list $pl.name 
+	</description>
+        <link>$feedurl/repos/index.vm</link>
+        <lastBuildDate>$date</lastBuildDate>
+        <ttl>1800</ttl>
+#foreach($p in $sorter.sort($pkgs,'name'))
+        <item>
+                <title>$p.name $p.version</title>
+                <description>$p.name has new version $p.version</description>
+                <link>$feedurl/repos/index.vm</link>
+                <guid>${pl.name}-${p.id}-${p.version}</guid>
+        </item>
+#end
+</channel>
+</rss>

@@ -1,0 +1,10 @@
+#access_admin()
+#set( $Integer = 0)
+#set ($factory = $hosts)
+#set ($module = "hosts")
+#set ($obj = $factory.getById($Integer.parseInt($params.key)))
+#if($obj)
+$instpackages.deleteByHost($obj)
+#end
+$factory.delete($obj)
+$response.sendRedirect("$root/$module/index.vm")

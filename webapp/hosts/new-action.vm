@@ -1,0 +1,20 @@
+#set($module="hosts")
+#access_admin()
+#set ($obj = $hosts.makeNew())
+#set ($obj.name=$params.name)
+#set ($obj.description=$params.description)
+#set ($obj.ipAddress=$params.ipAddress)
+#set ($obj.macAddress=$params.macAddress)
+#set ($obj.options=$params.options)
+#set ($obj.updateCount=0)
+#set ($obj.updateCountOrigin=0)
+#set ($obj.rebootRequired=false)
+#if($params.profileName != "-")
+#set ($obj.profile=$profiles.getByName($params.profileName))
+#else
+#set ($obj.profile=$null)
+#end
+#if($hosts_editable)
+$hosts.save($obj)
+#end
+#return_to_index("$module")

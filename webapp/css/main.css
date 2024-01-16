@@ -1,0 +1,182 @@
+	/* css for layout widget */
+	.ui-layout-content {
+		padding:		0;
+		overflow:		hidden;
+	}
+
+	.ui-layout-north {
+		border:0;
+		padding: 1em 1em 1em 0;
+	}
+	.ui-layout-center {
+		padding:		0;
+		overflow:		hidden;
+		border:			0;
+		}
+	/* css for slickgrid */
+	.slick-row.odd {
+		background-color: #ffffff;
+	}
+	.slick-row.even {
+		background-color: #f0f0f0;
+	}
+	.slick-cell.mycell {
+		border-style: none;
+		background-color: inherit;
+	}
+	.slick-cell.selected {
+  		background: #F0E0C0;
+	}
+/*
+	.slick-header-columns {
+		background: url('$root/images/header-bg.gif') repeat-x center top;
+	}	
+*/
+	/* other stuff */
+	input[type=text] { 
+		width:200px;
+		display:block;
+		float:left;        
+		margin-bottom:10px;
+		margin-top: 0.3em;
+	}
+	input {
+		display:block;
+		float:left;        
+		margin-bottom:10px;
+	}
+	label {
+		width:125px;
+		display:block;
+		float:left;
+		text-align:right;
+		padding-right:10px;
+		margin-top:6px;
+	}
+	select {
+		margin-bottom:10px;
+		width:200px;
+		display:block;
+		float:left;
+		padding-right:10px;
+		margin-top:0.2em;
+	}
+	.menu {
+		display: inline;
+		padding: 1em;
+	}
+	.menuheader {
+		display: inline;
+		padding: 1em;
+		background-color: #F0F0F0;
+		font-size: 11pt;
+	}
+	a.menubutton {
+		display: inline;
+		border-radius: 0px;
+		padding: 1em;
+		margin-top: 16px;
+		margin-bottom: 16px;
+		margin-right: 0px;
+		border: none;
+		color: #ddf0f2;
+		background: #03A9F6;
+		font-size: 11pt;
+	}
+	a.menubutton:hover {
+		color: #ddf0f2;
+		background: #2980BB;
+	}
+	p.overview {
+		margin-left: 40px;
+		margin-right: 40px;
+		font-size: 14px;
+		line-height: 16px;
+		background: #ffffff; /* Old browsers */
+	}
+	.rednumber-big { color:white;background:#e05050;border-radius:8px;font-size: 14px }
+	.greynumber-big { color:white;background:#909090;border-radius:8px;font-size: 14px }
+
+	a {
+		text-decoration: none;
+		color: black;
+	}
+
+	input.menu {
+		display: inline;
+		padding-right:2px;
+		width: auto;
+		float: none;
+	}
+	br { clear:left; }
+	input.text { margin-bottom:12px; padding: .4em; }
+
+	.ajaxBusy {
+		margin: 0px;
+		padding: 0px 0px 0px 0px;
+		position: absolute;
+		right: 3px;
+		top: 3px;
+		width: auto;
+	}	
+	input.searchbox {
+		margin: 0px;
+		float: right;
+		width: 120px;
+		margin-right: 64px;
+	}
+	.selectboxright {
+		width: 200px;
+		margin-left: 12px;
+	}
+	.selectboxleft {
+		width: 200px;
+		margin-right: 12px;
+	}
+	.centercol {
+		float: left;
+		position: relative;
+	}
+	.leftcol {
+		float: left;
+		position: relative;
+	}
+	.rightcol {
+		float: left;
+		position: relative;
+	}
+	.imgbutton { border: none; }
+
+.radiogroup label {
+	text-align: left;
+	padding-left: 0.5em;
+}
+
+.radiogroup input {
+	margin-left: 125px;
+}
+
+.formtextitem {
+	float: left;
+	width: 200px;
+	margin-top: 0.2em;
+}
+
+.attributeform {
+	margin-top: 2em;
+	padding: 1em;
+	background: #F0F0F0;
+	border-radius: 0.5em;
+	border: 1px solid lightgrey;
+}
+
+.form-modified {
+	background: #FFF8DE;
+}
+
+.certinfo {
+	margin-left: 135px;
+	background: white;
+	border-radius: 0.5em;
+	border: 1px solid lightgrey;
+}

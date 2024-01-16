@@ -1,0 +1,10 @@
+#set ($pl=$packagelists)
+#set ($r=$pl.load($params.list))
+#set($filterByOwner=$request.isUserInRole($restricted_role))
+#if(!$filterByOwner || $request.isUserInRole("$!pl.owner"))
+#if($pl.checkApproval())
+#set ($r=$pl.copyFrom($pl.origin))
+#set ($r=$pl.removeApproval())
+#end
+#end
+#return_to_index("packagelists")
