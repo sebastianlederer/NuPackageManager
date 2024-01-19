@@ -11,11 +11,11 @@
 
 #js_search("name")
 
-	function DiffCountFormatter(row, cell, value, columnDef, dataContext) {
+	function CountFormatter(row, cell, value, columnDef, dataContext) {
 		if (value == null || value === "0" || value==0) {
 			return "&nbsp;-&nbsp";
     		} else {
-      			return "<span style='color:white;background:#e05050;border-radius:8px'>&nbsp;" + value + "&nbsp;</span>";
+			return "<span class=\"greynumber-big\">&nbsp;" + value + "&nbsp;</span>";
 		}
 	}
 
@@ -37,6 +37,7 @@
   	var columns = [
 		{id: "name", name: "Name", field: "name", cssClass: "mycell"},
 		{id: "description", name: "Beschreibung", field: "description", cssClass: "mycell" },
+		{id: "hostcount", name: "Anzahl Hosts", field: "hostcount", cssClass: "mycell", formatter:CountFormatter },
 	];
 
 	$(document).ready(function () {

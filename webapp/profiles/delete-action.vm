@@ -3,5 +3,9 @@
 #set ($factory = $profiles)
 #set ($module = "profiles")
 #set ($obj = $factory.getById($Integer.parseInt($params.key)))
+#set ($repo_members = $profilerepos.getReposFromProfile($obj))
+#foreach ($r in $repo_members)
+$profilerepos.removeRepoFromProfile($r,$obj)
+#end
 $profiles.delete($obj)
 $response.sendRedirect("$root/$module/index.vm")

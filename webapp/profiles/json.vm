@@ -15,7 +15,8 @@
 #set ($sep="")
 #end
 #set($rps=$profilerepos.getReposFromProfile($pr))
-{ "id": $pr.id, "name": "$pr.name", "owner": "$!pr.owner", "description": "$!pr.description", "configOpts": "$!pr.configOpts", "repos": [#foreach($rp in $rps) "$rp.name"#if ($foreach.count!=$rps.size()),#{end}#{end} ] }$!sep
+#set($hsts=$hosts.getByProfile($pr))
+{ "id": $pr.id, "name": "$pr.name", "owner": "$!pr.owner", "description": "$!pr.description", "configOpts": "$!pr.configOpts", "repos": [#foreach($rp in $rps) "$rp.name"#if ($foreach.count!=$rps.size()),#{end}#{end} ], "hostcount": $hsts.size() }$!sep
 #end
 #if(!$params.key)
 ]

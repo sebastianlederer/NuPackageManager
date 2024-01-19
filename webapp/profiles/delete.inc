@@ -5,6 +5,9 @@
 		<label for="name">Name</label>
 		<input type="text" name="name" id="name" disabled class="text ui-widget-content ui-corner-all ui-state-disabled"/>
 		<br>
+		<label for "hostcount">Anzahl Hosts:</label>
+		<input type="text" name="hostcount" id="hostcount" disabled class="text ui-widget-content ui-corner-all ui-state-disabled"/>
+		<br>
 	</fieldset>
 	</form>
 </div>
@@ -12,9 +15,10 @@
 function form_delete_load(o) {
 				$("input#key").val(o.id);
 				$("input#name").val(o.name);
+				$("input#hostcount").val(o.hostcount);
 }
 
 function form_delete_validate() {
-	return true;
+	return o.hostcount===0;
 }
 </script>
