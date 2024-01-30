@@ -128,6 +128,12 @@ def update_all_pkg_versions(dbconn):
         dbconn.commit()
 
 
+def set_host_reboot(dbconn, host, reboot_req):
+    with dbconn.cursor() as cursor:
+        cursor.execute("UPDATE host SET reboot_required=%s WHERE id=%s", (reboot_req, host.id))
+        dbconn.commit()
+
+
 def mark_host_for_refresh(dbconn, host):
     with dbconn.cursor() as cursor:
         cursor.execute("UPDATE host SET needsrefresh=TRUE WHERE id=%s", (host.id,))
@@ -178,15 +184,22 @@ def perform_report(dbconn, host):
         return "[{}] ".format(exitcode) + output.splitlines()[-1][:78]
 
     pkgs = []
+    reboot_req = False
     for l in output.splitlines():
-        try:
-            name, version, arch = l.strip().split(" ")
-            pkgs.append((name, version, arch))
-        except:
-            print("malformed line:",l.strip())
+        clean_l = l.strip()
+        if clean_l == "##REBOOT":
+            reboot_req = True
+            print("reboot required for",host.name)
+        else:
+            try:
+                name, version, arch = clean_l.split(" ")
+                pkgs.append((name, version, arch))
+            except:
+                print("malformed line:",clean_l)
 
     update_host_pkgs(dbconn, host, pkgs)
 
+    set_host_reboot(dbconn, host, reboot_req)
     mark_host_for_refresh(dbconn, host)
 
     return "OK"
