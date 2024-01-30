@@ -36,6 +36,8 @@ public class Host implements Cloneable, Serializable {
 	private String action;
 	@DatabaseField
 	private String result;
+        @DatabaseField(columnName="needsrefresh", canBeNull = false)
+        private Boolean needsRefresh;
 	public Integer getId() {
 		return id;
 	}
@@ -113,5 +115,11 @@ public class Host implements Cloneable, Serializable {
 	}
 	public void setResult(String result) {
 		this.result = result;
+	}
+	public Boolean getNeedsRefresh() {
+		return needsRefresh;
+	}
+	public void setNeedsRefresh(Boolean needsRefresh) {
+		this.needsRefresh = needsRefresh;
 	}
 }

@@ -139,6 +139,12 @@ def update_repo_packages(dbconn, repo, fetched):
             """, (package, description, version, arch, repo.id))
 
         print("updated {} package versions from metadata for repo id".format(len(fetched)), repo.id)
+
+        cursor.execute("""UPDATE host SET needsrefresh=TRUE WHERE id IN
+                (SELECT id FROM host WHERE profile IN
+                 (SELECT profile FROM profile_repo WHERE repo=%s))
+                """, (repo.id,))
+
         dbconn.commit()
 
 

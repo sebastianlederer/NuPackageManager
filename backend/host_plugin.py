@@ -107,7 +107,7 @@ def crs_update_pkg_versions(cursor, host):
 
 def update_all_pkg_versions(dbconn):
     with dbconn.cursor() as cursor:
-        cursor.execute("SELECT * FROM host")
+        cursor.execute("SELECT * FROM host WHERE needsrefresh=TRUE")
         hosts = cursor.fetchall()
 
         for h in hosts:
@@ -121,10 +121,16 @@ def update_all_pkg_versions(dbconn):
 
         # number of different installed package versions to origin per host
         cursor.execute("""
-            UPDATE host SET upd_count_origin=(SELECT COUNT(*) FROM installed_pkg AS i
+            UPDATE host SET needsrefresh=FALSE, upd_count_origin=(SELECT COUNT(*) FROM installed_pkg AS i
                 WHERE host.id=i.host AND vers_local <> vers_origin)
         """)
 
+        dbconn.commit()
+
+
+def mark_host_for_refresh(dbconn, host):
+    with dbconn.cursor() as cursor:
+        cursor.execute("UPDATE host SET needsrefresh=TRUE WHERE id=%s", (host.id,))
         dbconn.commit()
 
 
@@ -180,6 +186,8 @@ def perform_report(dbconn, host):
             print("malformed line:",l.strip())
 
     update_host_pkgs(dbconn, host, pkgs)
+
+    mark_host_for_refresh(dbconn, host)
 
     return "OK"
 

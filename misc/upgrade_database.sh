@@ -2,6 +2,7 @@
 psql="psql -U nupama nupama -h localhost"
 schema_version=$($psql -q -t -A -c "SELECT value FROM config WHERE key='schema_version'")
 schema_version=$schema_version
+orig_schema_version=$schema_version
 echo "database schema version is $schema_version"
 
 if [ "$schema_version" = 1 ]
@@ -14,4 +15,20 @@ then
 	UPDATE config SET value=2 WHERE key='schema_version';
 EOF
 	schema_version=2
+fi
+
+if [ "$schema_version" = 2 ]
+then
+	:
+	$psql -q -t -A <<EOF
+	ALTER TABLE host ADD COLUMN needsrefresh BOOLEAN;
+	UPDATE host SET needsrefresh=false;
+	UPDATE config SET value=3 WHERE key='schema_version';
+EOF
+	schema_version=3
+fi
+
+if [ "$orig_schema_version" != "$schema_version" ]
+then
+	echo upgraded schema version to $schema_version.
 fi

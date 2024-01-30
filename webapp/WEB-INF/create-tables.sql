@@ -109,7 +109,8 @@ CREATE TABLE host (
 	upd_count_origin INTEGER NOT NULL,
 	reboot_required BOOLEAN NOT NULL,
 	action VARCHAR(8),
-	result VARCHAR(120)
+	result VARCHAR(120),
+	needsrefresh BOOLEAN NOT NULL
 );
 
 CREATE TABLE installed_pkg (
