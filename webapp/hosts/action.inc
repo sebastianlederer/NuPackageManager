@@ -2,7 +2,7 @@
 #set($form_title="Aktion für Host ausführen")
 
 <div id="dialog-form-${form_action}" title="${form_title}">
-	<form id="form-${form_action}" method="post" accept-charset="iso-8859-2" action="$root/$module/${form_action}-action.vm">
+	<form id="form-${form_action}" method="post" accept-charset="utf-8" action="$root/$module/${form_action}-action.vm">
 		<fieldset>
 		<input type="hidden" name="key" id="key"/>
 		#inputbox("name","Host", false)
@@ -36,5 +36,25 @@ function form_${form_action}_load(o) {
 function form_${form_action}_validate() {
 	var valid = true;
 	return valid;
+}
+
+function form_${form_action}_submit() {
+	var rows = grid.getSelectedRows();
+	var hosts = [];
+	var action = "";
+
+	if($("#actionReport:checked").val() !== undefined) action = "report";
+	if($("#actionConfigure:checked").val() !== undefined) action = "config";
+	if($("#actionUpdate:checked").val() !== undefined) action = "update";
+	if($("#actionReboot:checked").val() !== undefined) action = "reboot";
+	for(const r of rows) {
+		hosts.push(dataView.getItem(r).id);
+	}
+	console.log(hosts);
+	$.post("$root/$module/${form_action}-action.vm",
+		{
+			"action": action,
+			"key[]": hosts,
+		});
 }
 </script>

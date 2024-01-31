@@ -9,7 +9,7 @@
 #end
 <div id="dialog-form-${form_action}" title="${form_title}">
 	<p class="validateTips">All form fields are required.</p>
-	<form id="form-${form_action}" method="post" accept-charset="iso-8859-2" action="$root/$module/${form_action}-action.vm">
+	<form id="form-${form_action}" method="post" accept-charset="utf-8" action="$root/$module/${form_action}-action.vm">
 	<fieldset>
 		<input type="hidden" name="key" id="key"/>
 		#inputbox("name","Name",$isNewAction)

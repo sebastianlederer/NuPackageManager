@@ -1,7 +1,8 @@
 #set($module="hosts")
 #access_admin()
 #set ($Integer=0)
-#set ($obj=$hosts.getById($Integer.parseInt($params.key)))
+#foreach($hostid in $params.getValues("key[]"))
+#set ($obj=$hosts.getById($Integer.parseInt($hostid)))
 #set($action="")
 #if($params.action == "report")
 #set($action="R")
@@ -18,5 +19,6 @@
 #set ($obj.action=$action)
 #if($hosts_editable)
 $hosts.save($obj)
+#end
 #end
 #return_to_index("$module")

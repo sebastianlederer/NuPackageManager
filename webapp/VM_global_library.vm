@@ -101,13 +101,13 @@ Test $s
 ]]#
 #end
 
-#macro( js_create_grid $columns )
+#macro( js_create_grid $columns $multiselect)
 #[[ // create the layout - with data-table wrapper as the layout-content element
 		var options = { multiSelect: false, enableCellNavigation: true, enableColumnReorder: false, forceFitColumns: true };
 		var data = [];
 		var myLayout = $('body').layout({
 		resizeWhileDragging:		true,
-		useStateCookie:			false, // enable state management
+		useStateCookie:			true, // enable state management
 		center__onresize:		function(pane_name, pane, state, options) {
 							grid.resizeCanvas();
 						},
@@ -118,6 +118,9 @@ Test $s
 		});
 ]]#
 		dataView = new Slick.Data.DataView();
+#if($multiselect == true)
+		options.multiSelect = true;
+#end
 		grid = new Slick.Grid(myLayout.panes.center, dataView, ${columns}, options);
 		grid.setSelectionModel(new Slick.RowSelectionModel());
 		dataView.onRowCountChanged.subscribe(function (e, args) {

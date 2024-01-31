@@ -1,5 +1,5 @@
 <div id="dialog-form-rename" title="System umbenennen">
-	<form id="form-rename" method="post" accept-charset="iso-8859-2" action="$root/$module/rename-action.vm">
+	<form id="form-rename" method="post" accept-charset="utf-8" action="$root/$module/rename-action.vm">
 	<fieldset>
 		<input type="hidden" name="key" id="key"/>
 		<label for="name">Neuer Name</label>

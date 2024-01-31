@@ -12,10 +12,10 @@
 #js_default_formatters()
 #js_error_handler()
 #js_search("name")
-
 	function AlertFormatter(row,cell,value,columnDef,dataContext) {
 		return (value) ?  '<span class="ui-icon ui-icon-notice" style="display:inline-block"></span>' : "";
 	}
+
 
 	var grid;
 	var dataView;
@@ -35,7 +35,7 @@
 
 	$(document).ready(function () {
 
-#js_create_grid("columns")
+#js_create_grid("columns", true)
 
 #if($hosts_editable)
 		grid.onSelectedRowsChanged.subscribe(function() { 
@@ -78,7 +78,7 @@
 				var row=grid.getSelectedRows()[0];
 				var item=dataView.getItem(row);
 				var name=item.name;
-				var updates=item.diffcount;
+				var updates=item.updateCount;
 				var newLocation="$root/instpackages/index.vm?hostid="+item.id;
 				if(updates>0) newLocation += "&show=updates";
 				window.location=newLocation;
