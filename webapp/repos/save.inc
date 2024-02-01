@@ -13,7 +13,7 @@
 #end
 <div id="dialog-form-${form_action}" title="${form_title}">
 	<p class="validateTips">All form fields are required.</p>
-	<form id="form-${form_action}" method="post" accept-charset="iso-8859-2" action="$root/$module/${form_action}-action.vm">
+	<form id="form-${form_action}" method="post" accept-charset="utf-8" action="$root/$module/${form_action}-action.vm">
 	<fieldset>
 		<input type="hidden" name="key" id="key"/>
 #if($params.profile)
@@ -23,10 +23,6 @@
 		#inputbox("description","Beschreibung",true)
 		<br>
 		#checkbox("approvalRequired","Freigabe des Vorgängers zum Aktualisieren erforderlich",false)
-		<br>
-		#checkbox("atomic","Nur Komplett-Update",false)
-		<br>
-		#checkbox("signingmode","Selbst signieren",false)
 		<br>
 		<label for="pred">Vorgänger</label>
 		#dropdown( "pred", $repo_names,"") 
@@ -57,8 +53,6 @@ function form_${form_action}_load(o) {
 				$("input#autoUpdate").prop('checked',false);
 				$("input#owner").val('');
 				$("input#approvalRequired").prop('checked',false);
-				$("input#atomic").prop('checked',false);
-				$("input#signingmode").prop('checked',false);
 				$("input#approved").prop('checked',false);
 				$("select#pred").val("-");
 				$("select#origin").val("-");
@@ -76,8 +70,6 @@ function form_${form_action}_load(o) {
 				$("input#description").val(o.description);
 				$("input#owner").val(o.owner);
 				$("input#approvalRequired").prop('checked',o.approvalRequired);
-				$("input#atomic").prop('checked',o.atomic);
-				$("input#signingmode").prop('checked',o.signingmode);
 				$("input#approved").prop('checked',o.approved);
 				if(o.pred!="") {
 					$("select#pred").val(o.pred);
@@ -112,5 +104,30 @@ function form_${form_action}_validate() {
 
 	valid = checkIdentifier(name);
         return valid;
+}
+
+function form_${form_action}_submit() {
+	var fields = $("#form-${form_action} input, #form-${form_action} select");
+	var values = {};
+
+	for(var i = 0; i < fields.length; i++) {
+		const name = fields[i].name;
+
+		if(fields[i].type === 'checkbox') {
+			if(fields[i].checked) values[name] = true;
+		}
+		else {
+			values[name] = fields[i].value;
+		}
+	}
+	console.log("submit ${form_action}" + JSON.stringify(values));
+
+	$.post("$root/$module/${form_action}-action.vm", values)
+	.done(function() {
+		#js_load_data("$module", "id")
+	})
+	.fail(function() {
+		alert("POST error");
+	});
 }
 </script>

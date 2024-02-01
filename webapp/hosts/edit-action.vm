@@ -13,5 +13,7 @@
 #end
 #if($hosts_editable)
 $hosts.save($obj)
+$obj saved
+$params.description
 #end
-#return_to_index("$module")
+##return_to_index("$module")

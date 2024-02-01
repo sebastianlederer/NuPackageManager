@@ -33,8 +33,18 @@
 	}
 
 	function IndentFormatter(row, cell, value, columnDef, dataContext) {
-		var spacer = "<span style='display:inline-block;height:1px;width:" + (2 * dataContext["indent"]) + "em'></span>";
-		return spacer + value;	
+		const colors = [ "darkblue", "green", "darkgreen", "darkred" ];
+		const indent = dataContext["indent"];
+		var color = "black";
+		var strikeout = "";
+		if(indent <= colors.length)
+			color = colors[indent];
+		if (dataContext["action"] === "D")
+			strikeout = "text-decoration: line-through";
+		const spacer = '<span style="display:inline-block;height:1px;width:' + (2 * indent)
+			+ 'em"></span>';
+		return spacer + '<span style="color:' + color + ';' + strikeout
+			+ '">' + value + '</span>';
 	}
 
 	function DiffCountFormatter(row, cell, value, columnDef, dataContext) {

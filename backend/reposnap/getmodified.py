@@ -33,7 +33,7 @@ def http_request(method, url, headers):
 
         while not success and retries > 0:
             try:
-                resp = session.get(url, headers=headers)
+                resp = session.get(url, headers=headers, timeout=180)
                 success = True
             except Exception as e:
                 traceback.print_exc(0)

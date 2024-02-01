@@ -10,7 +10,7 @@
 <div id="dialog-form-${form_action}" title="${form_title}">
 	<p class="validateTips">All form fields are required.</p>
 	<form id="form-${form_action}" method="post" accept-charset="utf-8" action="$root/$module/${form_action}-action.vm">
-	<fieldset>
+	<fieldset name="$form_action">
 		<input type="hidden" name="key" id="key"/>
 		#inputbox("name","Name",$isNewAction)
 		#inputbox("description","Beschreibung",true)
@@ -29,22 +29,22 @@
 <script type="text/javascript">
 #if($isNewAction)
 function form_${form_action}_load(o) {
-				$("input#key").val('');
-				$("input#name").val('');
-				$("input#description").val('');
-				$("input#ipAddress").val('');
-				$("input#macAddress").val('');
+				$("fieldset[name=$form_action] #key").val('');
+				$("fieldset[name=$form_action] #name").val('');
+				$("fieldset[name=$form_action] #description").val('');
+				$("fieldset[name=$form_action] #ipAddress").val('');
+				$("fieldset[name=$form_action] #macAddress").val('');
 				$("select#profileName").val("");
-				$("input#options").val('');
+				$("fieldset[name=$form_action] #options").val('');
 }
 #else
 function form_${form_action}_load(o) {
-				$("input#key").val(o.id);
-				$("input#name").val(o.name);
-				$("input#description").val(o.description);
-				$("input#ipAddress").val(o.ipAddress);
-				$("input#macAddress").val(o.macAddress);
-				$("input#options").val(o.options);
+				$("fieldset[name=$form_action] #key").val(o.id);
+				$("fieldset[name=$form_action] #name").val(o.name);
+				$("fieldset[name=$form_action] #description").val(o.description);
+				$("fieldset[name=$form_action] #ipAddress").val(o.ipAddress);
+				$("fieldset[name=$form_action] #macAddress").val(o.macAddress);
+				$("fieldset[name=$form_action] #options").val(o.options);
 				if(o.profileName!="") {
 					$("select#profileName").val(o.profileName);
 				}
@@ -53,12 +53,31 @@ function form_${form_action}_load(o) {
 
 function form_${form_action}_validate() {
 	var valid = true;
-	var name = $("input#name").filter(":visible");
-	var description = $("input#description").filter(":visible");
-	var mac = $("input#macAddress").filter(":visible");
+	var name = $("fieldset[name=$form_action] #name").filter(":visible");
+	var description = $("fieldset[name=$form_action] #description").filter(":visible");
+	var mac = $("fieldset[name=$form_action] #macAddress").filter(":visible");
 
 	valid = checkIdentifier(name) && valid;
 	valid = (mac.val()=="" || checkMacAddress(mac)) && valid;
 	return valid;
+}
+
+function form_${form_action}_submit() {
+	$.post("$root/$module/${form_action}-action.vm",
+		{
+			"key":		$("fieldset[name=$form_action] #key").val(),
+			"name": 	$("fieldset[name=$form_action] #name").val(),
+			"description":	$("fieldset[name=$form_action] #description").val(),
+			"ipAddress":	$("fieldset[name=$form_action] #ipAddress").val(),
+			"macAddress":	$("fieldset[name=$form_action] #macAddress").val(),
+			"options":	$("fieldset[name=$form_action] #option").val(),
+			"profileName":	$("select#profileName").val()
+		})
+	.done(function() {
+		#js_load_data("$module", "name")
+	})
+	.fail(function() {
+		alert("POST error");
+	});
 }
 </script>

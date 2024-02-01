@@ -1,3 +1,5 @@
+#set($form_action="delete")
+
 <div id="dialog-form-delete" title="Repository löschen ?">
 	<form id="form-delete" method="post" accept-charset="iso-8859-2" action="$root/repos/delete-action.vm">
 	<fieldset>
@@ -19,5 +21,18 @@ function form_delete_load(o) {
 
 function form_delete_validate() {
 	return true;
+}
+
+function form_${form_action}_submit() {
+	$.post("$root/$module/${form_action}-action.vm",
+		{
+			"key": o.id,
+		})
+	.done(function() {
+		#js_load_data("$module", "name")
+	})
+	.fail(function() {
+		alert("POST error");
+	});
 }
 </script>

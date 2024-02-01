@@ -2,9 +2,12 @@
 #set( $Integer = 0)
 #set ($factory = $hosts)
 #set ($module = "hosts")
-#set ($obj = $factory.getById($Integer.parseInt($params.key)))
+#set($selected_hosts = $params.getValues("key[]"))
+#foreach($h in $selected_hosts)
+#set ($obj = $factory.getById($Integer.parseInt($h)))
 #if($obj)
 $instpackages.deleteByHost($obj)
 #end
 $factory.delete($obj)
-$response.sendRedirect("$root/$module/index.vm")
+#end
+##$response.sendRedirect("$root/$module/index.vm")
