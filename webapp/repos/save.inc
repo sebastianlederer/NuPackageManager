@@ -46,8 +46,34 @@
 	</form>
 </div>
 <script type="text/javascript">
+function make_repolist() {
+	var l = dataView.getLength();
+	var repolist = [ "-" ];
+
+	for(var i=0;i<l;i++) {
+		repolist.push(dataView.getItem(i).name);
+	}
+	return repolist
+}
+
+function form_${form_action}_init_selects() {
+	const repo_names = make_repolist();
+	const sel_pred = $("#form-${form_action} #pred");
+	const sel_origin = $("#form-${form_action} #origin");
+
+	sel_pred.html("");
+	sel_origin.html("");
+
+	for(const r of repo_names) {
+		sel_pred.append(new Option(r));
+		sel_origin.append(new Option(r));
+	}
+}
+
 #if($isNewAction)
 function form_${form_action}_load(o) {
+				form_${form_action}_init_selects();
+
 				$("input#name").val('');
 				$("input#description").val('');
 				$("input#autoUpdate").prop('checked',false);
@@ -65,6 +91,8 @@ function form_update_selects(o) {
 }
 ]]#
 function form_${form_action}_load(o) {
+				form_${form_action}_init_selects();
+
 				$("input#key").val(o.id);
 				$("input#name").val(o.name);
 				$("input#description").val(o.description);
@@ -98,6 +126,7 @@ function form_${form_action}_load(o) {
 				form_update_selects(o);
 }
 #end
+
 function form_${form_action}_validate() {
 	var valid;
         var name = $("input#name").filter(":visible");
@@ -106,28 +135,5 @@ function form_${form_action}_validate() {
         return valid;
 }
 
-function form_${form_action}_submit() {
-	var fields = $("#form-${form_action} input, #form-${form_action} select");
-	var values = {};
-
-	for(var i = 0; i < fields.length; i++) {
-		const name = fields[i].name;
-
-		if(fields[i].type === 'checkbox') {
-			if(fields[i].checked) values[name] = true;
-		}
-		else {
-			values[name] = fields[i].value;
-		}
-	}
-	console.log("submit ${form_action}" + JSON.stringify(values));
-
-	$.post("$root/$module/${form_action}-action.vm", values)
-	.done(function() {
-		#js_load_data("$module", "id")
-	})
-	.fail(function() {
-		alert("POST error");
-	});
-}
+#js_form_submit($form_action $module "id")
 </script>

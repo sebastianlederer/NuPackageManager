@@ -23,16 +23,5 @@ function form_delete_validate() {
 	return true;
 }
 
-function form_${form_action}_submit() {
-	$.post("$root/$module/${form_action}-action.vm",
-		{
-			"key": o.id,
-		})
-	.done(function() {
-		#js_load_data("$module", "name")
-	})
-	.fail(function() {
-		alert("POST error");
-	});
-}
+#js_delete_submit("repos", "id")
 </script>

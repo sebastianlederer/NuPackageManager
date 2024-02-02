@@ -88,4 +88,6 @@ function form_edit_validate() {
 	var name = $("input#name").filter(":visible");
 	return checkIdentifier(name);
 }
+
+#js_form_submit("edit" "profiles" "id")
 </script>

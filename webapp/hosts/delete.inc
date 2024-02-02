@@ -49,6 +49,7 @@ function form_${form_action}_submit() {
 			"key[]": hosts,
 		})
 	.done(function() {
+		grid.setSelectedRows([]);
 		#js_load_data("$module", "name")
 	})
 	.fail(function() {

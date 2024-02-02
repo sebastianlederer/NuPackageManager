@@ -57,4 +57,6 @@ function form_${form_action}_validate() {
 	valid = checkURL(url) && valid;
         return valid;
 }
+
+#js_form_submit($form_action, "upstream", "name")
 </script>

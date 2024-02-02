@@ -13,7 +13,7 @@
 #js_error_handler()
 #js_search("name")
 	function AlertFormatter(row,cell,value,columnDef,dataContext) {
-		return (value) ?  '<span class="ui-icon ui-icon-notice" style="display:inline-block"></span>' : "";
+		return (value) ?  '<span title="Reboot" class="ui-icon ui-icon-notice" style="display:inline-block"></span>' : "";
 	}
 
 
@@ -38,23 +38,27 @@
 #js_create_grid("columns", true)
 
 #if($hosts_editable)
-		grid.onSelectedRowsChanged.subscribe(function() { 
+		grid.onSelectedRowsChanged.subscribe(function() {
+			const selCount = grid.getSelectedRows().length;
+			const notMulti = selCount < 2;
+			const notSingle = selCount !== 1;
+			const nothing = selCount === 0;
 #if($computer_admin)
-			$("#button-edit").button("option","disabled",false);
+			$("#button-edit").button("option","disabled", notSingle);
 #if($properties_button)
-			$("#button-properties").button("option","disabled",false);
+			$("#button-properties").button("option","disabled", notSingle);
 #end
 #if($certificate_button)
-			$("#button-certificate").button("option","disabled",false);
+			$("#button-certificate").button("option","disabled", notSingle);
 #end
 #if($config_button)
-			$("#button-config").button("option","disabled",false);
+			$("#button-config").button("option","disabled", notSingle);
 #end
-			$("#button-rename").button("option","disabled",false);
-			$("#button-delete").button("option","disabled",false);
+			$("#button-rename").button("option","disabled", notSingle);
+			$("#button-delete").button("option","disabled", nothing);
 #end
-			$("#button-view").button("option","disabled",false);
-			$("#button-action").button("option","disabled",false);
+			$("#button-view").button("option","disabled", notSingle);
+			$("#button-action").button("option","disabled", nothing);
 
 	   		row_ids = grid.getSelectedRows();
  	  		console.log(row_ids);

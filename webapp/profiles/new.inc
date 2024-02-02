@@ -29,4 +29,6 @@ function form_new_validate() {
 	var name = $("input#name").filter(":visible");
 	return checkIdentifier(name);
 }
+
+#js_form_submit("new" "profiles" "id")
 </script>

@@ -369,3 +369,46 @@ $!_p.value#end
 		return false;
 	}
 #end
+
+#macro(js_form_submit $name $module $id)
+function form_${name}_submit() {
+	var fields = $("#form-${name} input, #form-${name} select");
+	var values = {};
+
+	for(var i = 0; i < fields.length; i++) {
+		const name = fields[i].name;
+
+		if(fields[i].type === 'checkbox') {
+			if(fields[i].checked) values[name] = true;
+		}
+		else {
+			values[name] = fields[i].value;
+		}
+	}
+	console.log("submit ${name}" + JSON.stringify(values));
+
+	$.post("$root/$module/${name}-action.vm", values)
+	.done(function() {
+		#js_load_data("$module", "$id")
+	})
+	.fail(function() {
+		alert("POST error in $module $name");
+	});
+}
+#end
+
+#macro(js_delete_submit $module $id)
+function form_delete_submit() {
+	$.post("$root/$module/delete-action.vm",
+		{
+			"key": o.id,
+		})
+	.done(function() {
+		grid.setSelectedRows([]);
+		#js_load_data("$module", "$id")
+	})
+	.fail(function() {
+		alert("POST error in $module delete");
+	});
+}
+#end

@@ -17,4 +17,6 @@ function form_delete_load(o) {
 function form_delete_validate() {
 	return true;
 }
+
+#js_delete_submit("upstream", "name")
 </script>

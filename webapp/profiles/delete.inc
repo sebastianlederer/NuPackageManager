@@ -21,4 +21,6 @@ function form_delete_load(o) {
 function form_delete_validate() {
 	return o.hostcount===0;
 }
+
+#js_delete_submit("profiles", "id")
 </script>

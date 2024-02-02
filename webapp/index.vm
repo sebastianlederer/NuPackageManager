@@ -18,6 +18,7 @@
 #end
 #set($systems_with_errors=0)
 #set($systems_with_updates=0)
+#set($systems_requiring_reboot=0)
 #set($comps=$hosts.getAll())
 #foreach($c in $comps)
 #if($c.result != "OK")
@@ -25,6 +26,9 @@
 #end
 #if($c.updateCount>0 || $c.updateCountOrigin>0)
 #set($systems_with_updates=$systems_with_updates+1)
+#end
+#if($c.rebootRequired)
+#set($systems_requiring_reboot=$systems_requiring_reboot+1)
 #end
 #end
 <script type="text/javascript">
@@ -41,6 +45,7 @@
 <span class="greynumber-big">&nbsp;$comps.size()&nbsp;</span> Systeme insgesamt<br>
 #rednumber($systems_with_updates) Systeme mit Updates<br>
 #rednumber($systems_with_errors) Systeme mit Fehlern<br>
+#rednumber($systems_requiring) Systeme mit erforderlichem Reboot<br>
 </p>
 <p class="overview">
 Task-Status:<br>

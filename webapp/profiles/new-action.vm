@@ -5,4 +5,4 @@
 #set ($obj.description = $!params.description)
 #set ($obj.configExtras = $!params.configExtras)
 $factory.save($obj)
-$response.sendRedirect("$root/profiles/index.vm")
+##$response.sendRedirect("$root/profiles/index.vm")
