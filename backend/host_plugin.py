@@ -110,7 +110,11 @@ def update_all_pkg_versions(dbconn):
         cursor.execute("SELECT * FROM host WHERE needsrefresh=TRUE")
         hosts = cursor.fetchall()
 
+        max = len(hosts)
+        cur = 1
         for h in hosts:
+            set_taskstatus(dbconn, h, cur, max, "updating package versions")
+            cur += 1
             crs_update_pkg_versions(cursor, h)
 
         # number of different installed package versions to predecessor per host
