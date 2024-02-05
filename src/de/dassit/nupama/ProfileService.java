@@ -52,7 +52,10 @@ public class ProfileService {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 
-		return result.get(0);
+                if(result == null || result.size() == 0)
+                    return null;
+                else
+                    return result.get(0);
 	}
 
 	public Profile getById(Integer i) {

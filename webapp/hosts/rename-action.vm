@@ -1,12 +1,4 @@
+#set($layout="empty.vm")
 #access_admin()
-#set ($factory = $hosts)
 #set ($module = "hosts")
-#set( $Integer = 0)
-#set ($obj = $factory.getById($Integer.parseInt($params.key)))
-#if ($factory.nameExists($params.name))
-Error: $params.name already exists
-#else
-#set ($obj.name = $params.name)
-$factory.save($obj)
-$response.sendRedirect("$root/$module/index.vm")
-#end
+#rename_action($params.key, $params.name, $hosts, $module)

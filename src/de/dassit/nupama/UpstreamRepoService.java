@@ -50,13 +50,16 @@ public class UpstreamRepoService {
 	public UpstreamRepo getByName(String n) {
 		List<UpstreamRepo> result = null;
 
-			try {
-				result = dao.queryForEq("name",n);
-			} catch (SQLException e) {
-				LOGGER.log(Level.SEVERE, e.getMessage(), e);
-			}
-			
-			return result.get(0);
+                try {
+                        result = dao.queryForEq("name",n);
+                } catch (SQLException e) {
+                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                }
+
+                if(result == null || result.size() == 0)
+                    return null;
+                else
+                    return result.get(0);
 	}
 
 	public UpstreamRepo getById(Integer i) {

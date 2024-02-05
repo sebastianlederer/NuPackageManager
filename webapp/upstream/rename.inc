@@ -18,4 +18,6 @@ function form_rename_validate(o) {
         var name = $("input#name").filter(":visible");
         return checkIdentifier(name);
 }
+
+#js_rename_submit("upstream", "name")
 </script>

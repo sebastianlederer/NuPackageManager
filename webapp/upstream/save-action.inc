@@ -15,4 +15,4 @@
 #set ($obj.type = $!params.type)
 #set ($obj.pubkey = $!params.pubkey)
 $factory.save($obj)
-$response.sendRedirect("$root/$module/index.vm")
+##$response.sendRedirect("$root/$module/index.vm")

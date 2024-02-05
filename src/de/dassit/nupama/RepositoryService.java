@@ -100,7 +100,10 @@ public class RepositoryService {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 
-		return addDaos(result.get(0));
+                if(result == null || result.size() == 0)
+                    return null;
+                else
+		    return addDaos(result.get(0));
 	}
 
 	public boolean nameExists(String n) {

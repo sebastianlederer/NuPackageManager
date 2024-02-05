@@ -155,7 +155,7 @@
 	</SCRIPT>
 <DIV class="ui-layout-center">
 </DIV>
-<DIV class="ui-layout-north">#parse("menu.vm")#taskstatus() #searchbox()</DIV>
+<DIV class="ui-layout-north">#parse("menu.vm")#taskstatus($module, "id") #searchbox()</DIV>
 <DIV class="ui-layout-south">
 <div class="buttons">
 <button id="button-new">Neu</button>

@@ -213,18 +213,20 @@ Test $s
 #access_admin()
 #set ($obj = $factory.getById($key))
 #set ($r = $factory.delete($obj))
-#return_to_index($module)
+##return_to_index($module)
 #end
 
-#macro(rename_action $old_name $new_name $factory $module)
+#macro(rename_action $key $new_name $factory $module)
 #access_admin()
-#if ($factory.nameExists($new_name))
+#if ($factory.getByName($new_name))
 Error: $new_name already exists
+$response.setStatus(409)
 #else
-#set ($obj = $factory.getByName($old_name))
+#set($Integer = 0)
+#set ($obj = $factory.getById($Integer.parseInt($key)))
 #set ($obj.name = $new_name)
 #set ($dummy = $factory.save($obj))
-#return_to_index($module)
+##return_to_index($module)
 #end
 #end
 
@@ -272,7 +274,7 @@ Error: $new_name already exists
 #end
 #end
 
-#macro(taskstatus)
+#macro(taskstatus $module $id)
 #set($s=$status.defaultStatus)
 &nbsp;&nbsp;&nbsp;&nbsp;
 <span id="task_progress" class="greynumber-big"></span>
@@ -281,9 +283,13 @@ Error: $new_name already exists
 function updateTaskStatus() {
 	$.getJSON("$root/taskstatus.vm", function(data) {
 		let p = data.progress;
+		const oldmsg = $('#task_progress').html();
 		if(p != '') p = '&nbsp;' + p + '&nbsp;';
 		$('#task_progress').html(p);
 		$('#task_status').html(data.task + ' ' + data.message);
+		if(oldmsg !== '' && data.message === '') {
+			#js_load_data($module $id)
+		}
 	});
 }
  $(document).ready(function() {
@@ -372,7 +378,7 @@ $!_p.value#end
 
 #macro(js_form_submit $name $module $id)
 function form_${name}_submit() {
-	var fields = $("#form-${name} input, #form-${name} select");
+	var fields = $("#form-${name} input, #form-${name} select, #form-${name} textarea");
 	var values = {};
 
 	for(var i = 0; i < fields.length; i++) {
@@ -389,10 +395,10 @@ function form_${name}_submit() {
 
 	$.post("$root/$module/${name}-action.vm", values)
 	.done(function() {
-		#js_load_data("$module", "$id")
+		#js_load_data($module, $id)
 	})
-	.fail(function() {
-		alert("POST error in $module $name");
+	.fail(function(response) {
+		alert("$module $name: " + response.responseText);
 	});
 }
 #end
@@ -405,10 +411,27 @@ function form_delete_submit() {
 		})
 	.done(function() {
 		grid.setSelectedRows([]);
-		#js_load_data("$module", "$id")
+		#js_load_data($module, $id)
 	})
-	.fail(function() {
-		alert("POST error in $module delete");
+	.fail(function(response) {
+		alert("$module delete: " + response.responseText);
+	});
+}
+#end
+
+#macro(js_rename_submit $module $id)
+function form_rename_submit() {
+	$.post("$root/$module/rename-action.vm",
+		{
+			"key": o.id,
+			"name": $("#form-rename input#name").val(),
+		})
+	.done(function() {
+		grid.setSelectedRows([]);
+		#js_load_data($module, $id)
+	})
+	.fail(function(response) {
+		alert("$module rename: " + response.responseText);
 	});
 }
 #end

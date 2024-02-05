@@ -18,4 +18,5 @@ function form_rename_validate() {
         var name = $("input#name").filter(":visible");
         return checkIdentifier(name);
 }
+#js_rename_submit("hosts", "name")
 </script>

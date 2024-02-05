@@ -103,7 +103,7 @@
 <DIV class="ui-layout-center">
 </DIV>
 <DIV class="ui-layout-north">#parse("menu.vm")
-#taskstatus()
+#taskstatus($module, "name")
 #searchbox()
 </DIV>
 <DIV class="ui-layout-south">

@@ -1,12 +1,14 @@
 #access_admin()
+#set($layout="empty.vm")
 #set ($factory = $upstream)
 #set ($module = "upstream")
 #set( $Integer = 0)
 #set ($obj = $factory.getById($Integer.parseInt($params.key)))
-#if ($factory.nameExists($params.name))
+#if ($factory.getByName($params.name))
 Error: $params.name already exists
+$response.setStatus(409)
 #else
 #set ($obj.name = $params.name)
 $factory.save($obj)
-$response.sendRedirect("$root/$module/index.vm")
+##$response.sendRedirect("$root/$module/index.vm")
 #end
