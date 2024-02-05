@@ -13,7 +13,8 @@
 #js_error_handler()
 #js_search("name")
 	function AlertFormatter(row,cell,value,columnDef,dataContext) {
-		return (value) ?  '<span title="Reboot" class="ui-icon ui-icon-notice" style="display:inline-block"></span>' : "";
+		// return (value) ?  '<span title="Reboot" class="ui-icon ui-icon-notice" style="display:inline-block"></span>' : "";
+		return (value) ?  '<span style="color:red">Reboot erforderlich</span>' : "";
 	}
 
 

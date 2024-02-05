@@ -45,7 +45,7 @@
 <span class="greynumber-big">&nbsp;$comps.size()&nbsp;</span> Systeme insgesamt<br>
 #rednumber($systems_with_updates) Systeme mit Updates<br>
 #rednumber($systems_with_errors) Systeme mit Fehlern<br>
-#rednumber($systems_requiring) Systeme mit erforderlichem Reboot<br>
+#rednumber($systems_requiring_reboot) Systeme mit erforderlichem Reboot<br>
 </p>
 <p class="overview">
 Task-Status:<br>

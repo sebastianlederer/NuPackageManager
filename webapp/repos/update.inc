@@ -26,4 +26,6 @@ Dieser Vorgang lässt sich nicht rückgängig machen.</p>
 		
 #end
 	}
+
+	#js_form_submit("update", "repos", "id")
 </script>

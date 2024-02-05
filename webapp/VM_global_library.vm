@@ -73,7 +73,12 @@ Test $s
 					$("input").removeClass( "ui-state-error" );
 					var bValid = true;
 					$( this ).dialog( "close" );
-					$( "#form-${name}" ).submit();
+					if(typeof(form_${name}_submit) == typeof(Function)) {
+						form_${name}_submit();
+					}
+					else {
+						$( "#form-${name}" ).submit();
+					}
 				},
 				"Abbrechen": function() {
 					$( this ).dialog( "close" );
@@ -370,6 +375,7 @@ $!_p.value#end
 		if(s == "" || s == null) return true;
 		for(i=0;i<columns.length;i++) {
 			var key = columns[i]['field'];
+			if(key === "rebootRequired" && item[key] === true && s.source === "reboot") return true;
 			if (typeof(item[key]) == "string" && item[key].match(s)) return true;
 		}
 		return false;

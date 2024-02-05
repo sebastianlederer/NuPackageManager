@@ -16,4 +16,6 @@ Das ausgewählte Repository wird sofort von seinem Upstream-Repository aktualisi
 	function form_${form_action}_load(o) {
 		$("input#key").val(o.id);
 	}
+
+	#js_form_submit("mirror", "repos", "id")
 </script>
