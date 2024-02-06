@@ -35,13 +35,13 @@ def http_request(method, url, headers):
             try:
                 resp = session.get(url, headers=headers, timeout=180)
                 if resp.status_code == 503:
-                    timeout = 180
+                    timeout = 300
                     raise Exception("HTTP status 503 - Service Unavailable")
                 success = True
             except Exception as e:
                 traceback.print_exc(0)
                 session.close()
-                print("  retrying",url)
+                print("  retrying",url,"in",timeout,"seconds")
                 time.sleep(timeout)
                 timeout = timeout + timeout
                 retries -= 1
