@@ -139,7 +139,7 @@
 				var row=grid.getSelectedRows()[0];
 				var item=dataView.getItem(row);
 				var name=item.name;
-				var updates=item.diffcount;
+				var updates=item.upd_count + item.upd_count_origin;
 				var newLocation="$root/packages/index.vm?repoid="+item.id;
 				if(updates>0) newLocation += "&show=updates";
 				window.location=newLocation;
