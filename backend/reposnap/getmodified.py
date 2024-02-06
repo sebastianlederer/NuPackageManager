@@ -30,15 +30,23 @@ def http_request(method, url, headers):
         success = False
         retries = 3
         resp = None
-
+        timeout = 10
         while not success and retries > 0:
             try:
                 resp = session.get(url, headers=headers, timeout=180)
+                if resp.status_code == 503:
+                    timeout = 180
+                    raise Exception("HTTP status 503 - Service Unavailable")
                 success = True
             except Exception as e:
                 traceback.print_exc(0)
-                time.sleep(3)
+                session.close()
+                print("  retrying",url)
+                time.sleep(timeout)
+                timeout = timeout + timeout
                 retries -= 1
+                session = requests.Session()
+                cached_session = session
         if retries == 0:
             raise Exception("Connection error for " + url)
     else:
@@ -56,7 +64,7 @@ def get_modified(url, oldfilepath):
         m_stamp = stats.st_mtime
         timestr = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime(m_stamp))
 
-        print(" If-Modified-Since: ", timestr, end="" )
+        print(" If-Modified-Since: ", timestr, end=" " )
 
         headers = { "If-Modified-Since": timestr }
     except:

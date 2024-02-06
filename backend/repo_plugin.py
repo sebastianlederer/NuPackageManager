@@ -112,6 +112,17 @@ def update_all_pkg_versions(dbconn):
             dbconn.commit()        
 
 
+def update_pkg_versions_chain(dbconn, origin):
+    with dbconn.cursor() as cursor:
+        cursor.execute("SELECT * FROM repository WHERE id=%s OR pred=%s OR origin=%s",
+            (origin,origin,origin))
+        repos = cursor.fetchall()
+        for r in repos:
+            cursor.execute("LOCK table repository IN ROW EXCLUSIVE MODE")
+            crs_update_pkg_versions(cursor, r)
+            dbconn.commit()
+
+
 def update_repo_packages(dbconn, repo, fetched):
     c = dpkg_cmp.VersionComparator()
     packages = {}
@@ -271,15 +282,12 @@ def process_repo(dbconn, r):
 
 def handler(dbconn):
     print("repository update handler")
-    count = 0
     with dbconn.cursor() as cursor:
         cursor.execute("SELECT * FROM repository WHERE action IS NOT NULL and action <> ''")
         for r in cursor:
             print(r.name, r.upstream, r.action)
             process_repo(dbconn, r)
-            count += 1
-    if count > 0:
-        update_all_pkg_versions(dbconn)
+            update_pkg_versions_chain(dbconn, r.id)
 
 
 def schedule(dbconn, schedule_name):

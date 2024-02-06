@@ -37,7 +37,7 @@
 function form_update_selects(o) {
 	var el = $("select#members");
 	el.empty(); // remove old options
-	$.each(o.repos, function(key,value) {
+	$.each(o.repos.sort(), function(key,value) {
 		el.append($("<option></option>")
 		.attr("value", value).text(value));
 	});
