@@ -17,9 +17,9 @@ public class InstalledPackage implements Cloneable, Serializable {
 	@DatabaseField(columnName = "vers_local", canBeNull = true)
 	private String localVersion;
 	@DatabaseField(columnName = "vers_repo", canBeNull = true)
-	private String originVersion;
-	@DatabaseField(columnName = "vers_origin", canBeNull = true)
 	private String repoVersion;
+	@DatabaseField(columnName = "vers_origin", canBeNull = true)
+	private String originVersion;
 	@DatabaseField(columnName = "host", foreign = true)
 	private Host host;
 	@DatabaseField(columnName = "fromrepo", foreign = true, canBeNull = true)
