@@ -5,7 +5,7 @@ import sys
 import gzip
 import xml.etree.ElementTree as ET
 import reposnap.fetch
-import reposnap.getmodified
+import reposnap.getmodified as getmodified
 import reposnap.filter_href
 import reposnap.rpm
 
@@ -88,7 +88,9 @@ def get_rpm_repo(url, localdir, progress_updater):
 
     reposnap.fetch.fetchdir(url, repodata_path, localdir, True)
 
-    return get_rpm_primary(url, repomd_path, localdir, progress_updater)
+    result = get_rpm_primary(url, repomd_path, localdir, progress_updater)
+
+    getmodified.close_session(url)
 
     # TODO: check signature
 

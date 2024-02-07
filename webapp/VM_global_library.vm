@@ -375,7 +375,7 @@ $!_p.value#end
 		if(s == "" || s == null) return true;
 		for(i=0;i<columns.length;i++) {
 			var key = columns[i]['field'];
-			if(key === "rebootRequired" && item[key] === true && s.source === "reboot") return true;
+			if(key === "rebootRequired" && item[key] === true && s.source.toLowercase() === "reboot") return true;
 			if (typeof(item[key]) == "string" && item[key].match(s)) return true;
 		}
 		return false;

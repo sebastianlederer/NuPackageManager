@@ -9,11 +9,18 @@ import shutil
 import requests
 import http.client
 
-cached_server = None
 cached_session = None
 
+
+def close_session(url):
+    global cached_session
+    if cached_session is not None:
+        cached_session.close()
+        cached_session = None
+
+
 def http_request(method, url, headers):
-    global cached_server, cached_session
+    global cached_session
 
     connection = None
     scheme, _, server, path = url.split('/', 3)
