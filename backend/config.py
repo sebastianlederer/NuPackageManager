@@ -8,8 +8,8 @@ server_url=None
 repo_path=None
 ssh_user=None
 ssh_key=None
+command_timeout=None
 action_hook=None
-
 
 def getconf(section, key, default):
     if key in section:
@@ -37,6 +37,7 @@ def read_config():
     ssh_key    = section['ssh_key']
     ssh_processes = int(getconf(section, 'ssh_processes', 4))
     ssh_timeout = int(getconf(section, 'ssh_timeout', 15))
+    command_timeout = int(getconf(section, 'command_timeout', 900))
     if 'action_hook' in section:
         action_hook = section['action_hook']
 

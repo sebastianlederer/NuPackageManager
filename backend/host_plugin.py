@@ -165,7 +165,7 @@ def command_output(cmd, script):
     print("executing command",cmd)
     child = subprocess.Popen(cmd, shell=True, encoding='utf8',
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output, err = child.communicate(input=script, timeout=600)
+    output, err = child.communicate(input=script, timeout=config.command_timeout)
     child.wait()
     return (child.returncode, output)
 

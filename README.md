@@ -75,19 +75,23 @@ Here is a list of files you need to prepare in this way:
 * conf/actions/upgrade.dist
 * conf/backend.conf.dist
 
-You need to modify at least these files according to your installation:
-* conf/backend.conf - set the server url, mirroring directory and SSH identity
-* tomcat/nupama-tomcat.properties - set server.location to your install directory
-* tomcat/conf/server.xml.dist - set up authentication, or delegate it to reverse proxy
-* tomcat/conf/tomcat-users.xml.dist - set up users and groups if you use Tomcat builtin authentication
 
-Backend-Configuration
+> [!NOTE]
+> You need to modify at least these files according to your installation:
+> * conf/backend.conf - set the server url, mirroring directory and SSH identity
+> * tomcat/nupama-tomcat.properties - set server.location to your install directory
+> * tomcat/conf/server.xml.dist - set up authentication, or delegate it to reverse proxy
+> * tomcat/conf/tomcat-users.xml.dist - set up users and groups if you use Tomcat builtin authentication
+
+Backend Configuration
 ----------------------
 ### SSH identity
 Nupama will make SSH connections to the managed hosts to gather information,
 configure repositories, do updates and reboots. You can configure the user that
 Nupama will use for the SSH connection, and the SSH key, with *ssh_user* and
 *ssh_key* in *conf/backend.conf*.
+You also need to make sure that the host keys of all managed hosts are stored
+in the *.ssh/known_hosts* file of *ssh_user*.
 
 ### Server URL
 The server URL is used by the configuration action to set up repositories on
@@ -124,8 +128,31 @@ via the web interface (e.g. "report" or "upgrade"). The content of the
 action script is fed as standard input to the remote shell via SSH. In some cases
 ("config" and "pubkey"), additional data is appended to the action script file
 contents, that is, the generated content for repo keys or repo configuration.
+Action scripts are stored in the *conf/actions* subdirectory.
 
-Frontend-Configuration
+* *config* is used to create the repository configuration - for APT repositories, this
+   writes the file */etc/apt/sources.list*
+* *pubkey* installs a repository signing key, if there is one
+* *reboot* reboots the target machine
+* *report* creates a report of all installed packages - this script must output
+   a line for each package with three space-separated fields: Package name, version
+  and architecture
+* *upgrade* executes an upgrade command on the target machine - for APT repositories,
+   this is the command *apt update && apt upgrade*
+
+### Timeouts
+The connection timeout for SSH connections can be set with *ssh_timeout*
+in *conf/backend.conf*.
+
+You can also configure a timeout for running action scripts with the
+*command_timeout* variable in *conf/backend.conf*.
+
+### Parallel SSH connections
+When executing host actions, several SSH connections are made concurrently.
+The number of parallel connections can be configured in *conf/backend.conf*
+with the *ssh_processes* variable.
+
+Frontend Configuration
 -------------------------
 The web application is a servlet inside an Tomcat embedded application server. Standard
 Tomcat and servlet configuration mechanisms apply.
@@ -149,7 +176,3 @@ localhost by modifying the *Connector* configuration.
 It is also possible to let Tomcat do HTTPS encryption by configuring a
 *Connector* with *SSLEnable="true"*. You may then have to deal with preparing a Java
 keystore with the certificates, though.
-
-> [!CAUTION]
-> The provided configuration allows HTTP connections to port 8080 from anywhere, which
-> should never be used except for testing. Please change this on a production server.

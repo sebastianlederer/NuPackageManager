@@ -1,6 +1,5 @@
 [DEFAULT]
 dsn=dbname=nupama user=nupama host=localhost password=nupama
-processes=4
 mirror_dir=/repo/nupama
 server_url=http://....
 repo_path=/repo
@@ -8,3 +7,4 @@ ssh_user=nupama
 ssh_key=/home/nupama/.ssh/id_rsa
 ssh_processes=4
 ssh_timeout=15
+command_timeout=1800
