@@ -1,5 +1,6 @@
 import datetime
 import os
+import traceback
 import reposnap
 import reposnap.apt
 import reposnap.rpm
@@ -285,9 +286,13 @@ def handler(dbconn):
     with dbconn.cursor() as cursor:
         cursor.execute("SELECT * FROM repository WHERE action IS NOT NULL and action <> ''")
         for r in cursor:
-            print(r.name, r.upstream, r.action)
-            process_repo(dbconn, r)
-            update_pkg_versions_chain(dbconn, r.id)
+            try:
+                print(r.name, r.upstream, r.action)
+                process_repo(dbconn, r)
+                update_pkg_versions_chain(dbconn, r.id)
+            except:
+                traceback.print_exc()
+                print("error executing action {} for repository {}".format(r.action, r.name))
 
 
 def schedule(dbconn, schedule_name):
