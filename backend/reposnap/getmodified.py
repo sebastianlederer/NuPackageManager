@@ -7,9 +7,32 @@ import traceback
 import email.utils
 import shutil
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 import http.client
 
 cached_session = None
+
+
+def get_session():
+    global cached_session
+
+    if cached_session is not None:
+        return cached_session
+
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=4,
+        backoff_factor=2,
+        status_forcelist=[408, 413, 429, 503]
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+
+    cached_session = session
+
+    return session
 
 
 def close_session(url):
@@ -20,42 +43,25 @@ def close_session(url):
 
 
 def http_request(method, url, headers):
-    global cached_session
-
     connection = None
     scheme, _, server, path = url.split('/', 3)
     #print("http_request",scheme, method, server, path)
 
-    if cached_session == None:
-        cached_session = requests.Session()
-
-    session = cached_session
+    session = get_session()
 
     body = None
 
     if method == 'GET':
-        success = False
-        retries = 3
         resp = None
-        timeout = 10
-        while not success and retries > 0:
-            try:
-                resp = session.get(url, headers=headers, timeout=180)
-                if resp.status_code == 503:
-                    timeout = 300
-                    raise Exception("HTTP status 503 - Service Unavailable")
-                success = True
-            except Exception as e:
-                traceback.print_exc(0)
-                session.close()
-                print("  retrying",url,"in",timeout,"seconds")
-                time.sleep(timeout)
-                timeout = timeout + timeout
-                retries -= 1
-                session = requests.Session()
-                cached_session = session
-        if retries == 0:
-            raise Exception("Connection error for " + url)
+        try:
+            resp = session.get(url, headers=headers, timeout=180)
+            if resp.status_code == 503:
+                timeout = 300
+                raise Exception("HTTP status 503 - Service Unavailable")
+        except Exception as e:
+            #traceback.print_exc(0)
+            print(e)
+            close_session()
     else:
         raise Exception("unsupported method")
 
