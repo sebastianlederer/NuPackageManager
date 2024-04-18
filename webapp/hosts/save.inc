@@ -71,7 +71,7 @@ function form_${form_action}_submit() {
 			"ipAddress":	$("fieldset[name=$form_action] #ipAddress").val(),
 			"macAddress":	$("fieldset[name=$form_action] #macAddress").val(),
 			"options":	$("fieldset[name=$form_action] #option").val(),
-			"profileName":	$("select#profileName").val()
+			"profileName":	$("#dialog-form-$form_action select#profileName").val()
 		})
 	.done(function() {
 		#js_load_data("$module", "name")
