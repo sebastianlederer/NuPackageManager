@@ -60,7 +60,7 @@ public class RepositoryService {
 			List<Repository> result) throws SQLException {
 		for(Repository r:all) {
 			Repository pred = r.getPred();
-			if(pred != null && (pred.getId() == parent.getId())) {
+			if(pred != null && pred.getId().equals(parent.getId())) {
 				result.add(r);
 				r.setIndent(indent);
 				addChildren(all, r, indent + 1, result);
