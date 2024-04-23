@@ -11,7 +11,7 @@
 #set($action="CR")
 #end
 #if($params.action == "update")
-#set($action="UR")
+#set($action="CUR")
 #end
 #if($params.action == "reboot")
 #set($action="B")
