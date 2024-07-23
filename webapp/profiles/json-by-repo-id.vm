@@ -1,0 +1,15 @@
+#set ($layout="json.vm")
+#set ($dummy = $dbtool)
+#set ($res=${response.setContentType("application/json")})
+#if($params.key)
+#set ($r=$repos.getById($params.key))
+#set ($mArray=$profilerepos.getByRepoId($r.id))
+#set($sep="")
+[
+#foreach($m in $mArray)
+#set($p=$profiles.getById($m.profile.id))
+$sep{ "repoId": $m.repo.id, "profileId": $m.profile.id, "profileName": "$p.name"}
+#set($sep=",")
+#end
+]
+#end
