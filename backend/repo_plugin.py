@@ -45,6 +45,7 @@ def repodelete(dbconn, repo):
     with dbconn.cursor() as cursor:
         cursor.execute("DELETE FROM package WHERE repo=%s", (repo.id,))
         cursor.execute("DELETE FROM repository WHERE id=%s", (repo.id,))
+    dbconn.commit()
 
 
 def copy_repo_packages(dbconn, repo):

@@ -3,6 +3,7 @@ import sys
 import time
 import psycopg2
 import psycopg2.extras
+import psycopg2.extensions
 import repo_plugin,host_plugin
 import config
 import traceback
@@ -54,10 +55,12 @@ def update_handler(dbconn):
     print("update_handler called")
     for h in handler_plugin_list:
         h(dbconn)
+        if dbconn.status != psycopg2.extensions.STATUS_READY:
+            dbconn.cancel()
+            dbconn.reset()
 
 
 def database_changed(dbconn, cursor,serial,id,handler):
-        cursor.execute("UPDATE notification SET ack=%d WHERE id=%d" % (serial,id))
         # print " update"
         handler(dbconn)
         time.sleep(3)
@@ -79,15 +82,22 @@ def watch_db(db,id,handler):
                 cursor.execute("SELECT serial,ack FROM notification WHERE id=%d" % (id))
                 result=cursor.fetchone()
                 serial,ack=result
-                # print serial,ack
+                cursor.execute("UPDATE notification SET ack=%d WHERE id=%d" % (serial,id))
+                db.commit()
                 if ack<serial:
+                        print("serial", ack, "->", serial)
                         database_changed(db,cursor,serial,id,handler)
-                # the select statement above starts a transaction, so
-                # commit now
-                cursor.connection.commit()
+                run = True
+            except psycopg2.errors.InFailedSqlTransaction as ex:
+                traceback.print_exc()
+                print("\ncancelling failed transaction")
+                db.cancel()
+                db.reset()
+                run = False
             except Exception as ex:
                 traceback.print_exc()
                 print("\nresuming main loop")
+                run = False
         cursor.close()
 
 
@@ -95,15 +105,20 @@ def main():
     global dbconn
     config.read_config()
 
-    dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
-    print(dbconn)
-
     cmd = sys.argv[1]
 
-    if cmd == "watch":
-        watch_db(dbconn, 1, update_handler)
-    elif cmd == "schedule":
-        process_schedule(dbconn, sys.argv[2])
+    dbconn = None
+
+    while True:
+        if dbconn is None or dbconn.closed:
+            dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
+            print("database connection established", dbconn)
+            time.sleep(5)
+
+        if cmd == "watch":
+            watch_db(dbconn, 1, update_handler)
+        elif cmd == "schedule":
+            process_schedule(dbconn, sys.argv[2])
 
     dbconn.close()
 
