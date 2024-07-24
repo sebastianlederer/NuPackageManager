@@ -106,21 +106,23 @@ def main():
     config.read_config()
 
     cmd = sys.argv[1]
-
+    reconnect = True
     dbconn = None
 
-    while True:
+    while reconnect:
         if dbconn is None or dbconn.closed:
             dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
-            print("database connection established", dbconn)
             time.sleep(5)
 
         if cmd == "watch":
+            print("database connection established", dbconn)
             watch_db(dbconn, 1, update_handler)
         elif cmd == "schedule":
             process_schedule(dbconn, sys.argv[2])
+            reconnect = False
 
     dbconn.close()
+
 
 if __name__ == "__main__":
     main()
