@@ -5,6 +5,7 @@ import time
 import sys
 import re
 import gzip
+import lzma
 import http.client
 
 import reposnap.fetch as fetch
@@ -68,7 +69,9 @@ def process_record(data, results, filter_sections=None, filter_regex=None):
 def filter_packages_apt(path, filter_sections=None, filter_regex=None):
     results = []
 
-    if path.endswith('.gz'):
+    if path.endswith('.xz'):
+        open_func = lzma.open
+    elif path.endswith('.gz'):
         open_func = gzip.open
     else:
         open_func = open
@@ -167,6 +170,14 @@ def fetch_by_release_file(components, url, releasepath, localdir, archs):
                 fetch.fetchdir(url, byhashdir, localdir, True)
 
 
+def find_packages_file(localdir, subpath):
+    p = os.path.join(localdir, subpath, 'Packages.xz')
+    if os.path.exists(p):
+        return p
+    else:
+        return os.path.join(localdir, subpath, 'Packages.gz')
+
+
 def fetch_repo_components(components, url, localdir, dist, archs = None,
     filter_sections = None, filter_regex = None,
     progress_updater = None):
@@ -198,7 +209,7 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
         old_packages[comp] = {}
         for arch in archs:
             subpath = distpath + '/binary-' + arch
-            packages_gz = os.path.join(localdir, subpath, 'Packages.gz')
+            packages_gz = find_packages_file(localdir, subpath)
             old_packages[comp].update(get_old_versions_dict(packages_gz, filter_sections, filter_regex))
 
     fetch_by_release_file(components, url, releasepath, localdir, archs)
@@ -209,7 +220,7 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
         for arch in archs:
             distpath = "dists/" + dist + "/" + comp
             subpath = distpath + '/binary-' + arch
-            packages_gz = os.path.join(localdir, subpath, 'Packages.gz')
+            packages_gz = find_packages_file(localdir, subpath)
 
             print("scanning {} ({})".format(packages_gz, arch), end="")
             results = filter_packages_apt(packages_gz, filter_sections, filter_regex)
