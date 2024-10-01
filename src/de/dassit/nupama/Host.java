@@ -38,6 +38,9 @@ public class Host implements Cloneable, Serializable {
 	private String result;
         @DatabaseField(columnName="needsrefresh", canBeNull = false)
         private Boolean needsRefresh;
+        @DatabaseField(columnName="action_args")
+        private String actionArgs;
+
 	public Integer getId() {
 		return id;
 	}
@@ -121,5 +124,11 @@ public class Host implements Cloneable, Serializable {
 	}
 	public void setNeedsRefresh(Boolean needsRefresh) {
 		this.needsRefresh = needsRefresh;
+	}
+	public String getActionArgs() {
+		return actionArgs;
+	}
+	public void setActionArgs(String actionArgs) {
+		this.actionArgs = actionArgs;
 	}
 }

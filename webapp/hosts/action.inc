@@ -25,6 +25,12 @@
 				<br>
 				<input type="radio" name="action" id="actionReboot" value="reboot">
 				<label for="actionReboot">Reboot</label>
+				<br>
+				<input type="radio" name="action" id="actionCustom" value="custom"
+					style="margin-bottom: 1.5em">
+				<label for="actionCustom">Custom</label>
+				<input name="actionArgs" id="actionArgs" size=25 placeholder="shell command"
+					style="margin-left:-6em; margin-top: 0.3em;display: none">
 			</span>
 		</fieldset>
 	</form>
@@ -47,22 +53,45 @@ function form_${form_action}_load(o) {
 
 	$("input#key").val(o.id);
 	$("input#actionReport").prop('checked', true);
+	$("input#actionArgs").val('');
+
+	$("input[name=action]").off("change");
+	$("input[name=action]").on("change", function() {
+		if($(this).val() == "custom") {
+			$("#actionArgs").show();
+			$("#actionArgs").focus();
+		}
+		else {
+			$("#actionArgs").hide();
+		}
+	});
 }
 
 function form_${form_action}_validate() {
-	var valid = true;
-	return valid;
+        if($("#actionCustom:checked").val() !== undefined) 
+	{
+		return checkLength($("#actionArgs"),"args", 1, 128);
+	}
+	else {
+		return true;
+	}
 }
 
 function form_${form_action}_submit() {
 	var rows = grid.getSelectedRows();
 	var hosts = [];
 	var action = "";
+	var args = "";
 
 	if($("#actionReport:checked").val() !== undefined) action = "report";
 	if($("#actionConfigure:checked").val() !== undefined) action = "config";
 	if($("#actionUpdate:checked").val() !== undefined) action = "update";
 	if($("#actionReboot:checked").val() !== undefined) action = "reboot";
+	if($("#actionCustom:checked").val() !== undefined) {
+		action = "custom";
+		args = $("#actionArgs").val();
+	}
+
 	for(const r of rows) {
 		hosts.push(dataView.getItem(r).id);
 	}
@@ -72,6 +101,7 @@ function form_${form_action}_submit() {
 		{
 			"action": action,
 			"key[]": hosts,
+			"action_args": args,
 		})
 	.done(function() {
 		#js_load_data("$module", "name")

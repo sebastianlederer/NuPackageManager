@@ -4,3 +4,4 @@ lib
 *.jar
 *.class
 *.zip
+**/__pycache__

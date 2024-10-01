@@ -16,7 +16,15 @@
 #if($params.action == "reboot")
 #set($action="B")
 #end
+#if($params.action == "custom")
+#set($action="M")
+#end
 #set ($obj.action=$action)
+#if($params.action_args)
+#set($obj.actionArgs = $params.action_args)
+#else
+#set($obj.actionArgs = "")
+#end
 #if($hosts_editable)
 $hosts.save($obj)
 #end

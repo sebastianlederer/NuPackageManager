@@ -16,7 +16,7 @@
 #set ($sep="")
 #end
 #set($status.value=0)
-{ "id": $c.id, "name": "$c.name", "description": "$!c.description", "ipAddress": "$!c.ipAddress", "macAddress": "$!c.macAddress", "owner": "$!c.owner", "options": "$!esc.javascript($c.options)", "profileName": "$!c.profile.name", "updateCount": $c.updateCount, "updateCountOrigin": $c.updateCountOrigin, "action": "$!c.action", "result":"$!c.result", "rebootRequired": $c.rebootRequired }$!sep
+{ "id": $c.id, "name": "$c.name", "description": "$!c.description", "ipAddress": "$!c.ipAddress", "macAddress": "$!c.macAddress", "owner": "$!c.owner", "options": "$!esc.javascript($c.options)", "profileName": "$!c.profile.name", "updateCount": $c.updateCount, "updateCountOrigin": $c.updateCountOrigin, "action": "$!c.action", "result":"$!esc.java($c.result)", "rebootRequired": $c.rebootRequired }$!sep
 #end
 #if(!$params.key)
 ]

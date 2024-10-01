@@ -8,7 +8,7 @@ from collections import namedtuple
 import config
 import dpkg_cmp
 
-HostTuple = namedtuple("HostTuple", "id name profile action index max")
+HostTuple = namedtuple("HostTuple", "id name profile action action_args index max")
 
 command_prefix = ''
 
@@ -241,6 +241,19 @@ def perform_reboot(dbconn, host):
         return "- " + output.splitlines()[-1][:78]
 
 
+def perform_custom(dbconn, host):
+    script = """
+    """
+
+    script = host.action_args
+    exitcode, output = remote_command(host, script)
+
+    if exitcode == 0:
+        return "OK"
+    else:
+        return "- " + output.splitlines()[-1][:78]
+
+
 def perform_config(dbconn, host):
     download_url = config.server_url
     repo_path = config.repo_path
@@ -305,7 +318,7 @@ def perform_config(dbconn, host):
 
 def call_action_hook(host):
     if config.action_hook is not None:
-        cmd = '{} {} {}'.format(config.action_hook, host.name, host.action)
+        cmd = '{} {} {} {}'.format(config.action_hook, host.name, host.action, host.action_args)
 
 
 def perform_action(dbconn, host):
@@ -319,6 +332,8 @@ def perform_action(dbconn, host):
         result = perform_report(dbconn, host)
     if 'B' in host.action:
         result = perform_reboot(dbconn, host)
+    if 'M' in host.action:
+        result = perform_custom(dbconn, host)
 
     return result
 
@@ -336,6 +351,8 @@ def describe_action(dbconn, host):
         result += ' reboot'
     if 'C' in host.action:
         result += ' config'
+    if 'M' in host.action:
+        result += ' custom cmd'
 
     return result
 
@@ -384,7 +401,8 @@ def handler(dbconn):
         result = list(cursor.fetchall())
         max = len(result)
         if max > 0:
-            hosts = [ HostTuple(h.id,h.name,h.profile,h.action,counter(),max) for h in result ]
+            hosts = [ HostTuple(h.id,h.name, h.profile, \
+                        h.action, h.action_args, counter(),max) for h in result ]
             firsthost = hosts[0]
             set_taskstatus(dbconn, firsthost, 0, max, describe_action(dbconn, firsthost))
             parallel_action(dbconn, hosts)

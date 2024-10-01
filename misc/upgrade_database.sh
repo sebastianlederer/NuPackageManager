@@ -28,6 +28,16 @@ EOF
 	schema_version=3
 fi
 
+if [ "$schema_version" = 3 ]
+then
+	:
+	$psql -q -t -A <<EOF
+	ALTER TABLE host ADD COLUMN action_args VARCHAR(128);
+	UPDATE config SET value=4 WHERE key='schema_version';
+EOF
+	schema_version=4
+fi
+
 if [ "$orig_schema_version" != "$schema_version" ]
 then
 	echo upgraded schema version to $schema_version.
