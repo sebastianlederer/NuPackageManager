@@ -36,6 +36,19 @@
 	</form>
 </div>
 <script type="text/javascript">
+function form_action_showhide() {
+	let argsField = $("#actionArgs");
+	let radio = $("#actionCustom:checked");
+
+	if(radio.val() == "custom") {
+		argsField.show();
+		argsField.focus();
+	}
+	else {
+		argsField.hide();
+	}
+}
+
 function form_${form_action}_load(o) {
 	var rows = grid.getSelectedRows();
 	const hosts = $("#hosts");
@@ -56,15 +69,9 @@ function form_${form_action}_load(o) {
 	$("input#actionArgs").val('');
 
 	$("input[name=action]").off("change");
-	$("input[name=action]").on("change", function() {
-		if($(this).val() == "custom") {
-			$("#actionArgs").show();
-			$("#actionArgs").focus();
-		}
-		else {
-			$("#actionArgs").hide();
-		}
-	});
+	$("input[name=action]").on("change", form_action_showhide);
+
+	form_action_showhide();
 }
 
 function form_${form_action}_validate() {
