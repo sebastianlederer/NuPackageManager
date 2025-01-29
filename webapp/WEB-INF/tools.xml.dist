@@ -26,6 +26,8 @@
   <data key="hosts_editable" value="true"/>
   <data key="config_button" value="false"/>
   <data key="restricted_role" value="packagemanager-r"/>
+  <data key="actionPresets" type="list" value="sleep 10; echo test; false,sleep 10;true"/>
+
   <toolbox scope="request">
     <tool key="pager" createSession="true"/>
     <tool key="params" locale="de_DE"/>

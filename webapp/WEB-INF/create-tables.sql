@@ -38,7 +38,7 @@ SET default_with_oids = false;
 
 CREATE TABLE notification (
     id integer NOT NULL,
-    serial integer NOT NULL,
+    serial SERIAL NOT NULL,
     ack integer
 );
 
@@ -110,7 +110,8 @@ CREATE TABLE host (
 	reboot_required BOOLEAN NOT NULL,
 	action VARCHAR(8),
 	result VARCHAR(120),
-	needsrefresh BOOLEAN NOT NULL
+	needsrefresh BOOLEAN,
+	action_args VARCHAR(128)
 );
 
 CREATE TABLE installed_pkg (

@@ -34,7 +34,7 @@
     </security-role-ref>
     -->
     <servlet-name>velocity</servlet-name>
-    <servlet-class>org.apache.velocity.tools.view.VelocityLayoutServlet</servlet-class>
+    <servlet-class>de.dassit.nupama.LayoutServlet</servlet-class>
     <init-param>
       <param-name>org.apache.velocity.tools.deprecationSupportMode</param-name>
       <param-value>true</param-value>
