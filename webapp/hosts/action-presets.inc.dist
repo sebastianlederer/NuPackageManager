@@ -1,1 +1,1 @@
-#set($action_presets = [ "echo test", "sleep 10;echo test2" ])
+#set($actionPresets = [ "echo test;false", "sleep 10;echo test2" ])

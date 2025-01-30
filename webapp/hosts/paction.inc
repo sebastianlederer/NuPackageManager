@@ -1,6 +1,6 @@
 #set($form_action="paction")
 #set($form_title="Aktion für alle Hosts eines Profils ausführen")
-#parse("$module/action-presets.vm")
+#parse("$module/action-presets.inc")
 #set ($profile_names = [ "-" ])
 #foreach ($l in $sorter.sort($profiles.getAll(),"name"))
 #set($dummy=$profile_names.add($l.name))

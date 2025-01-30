@@ -84,9 +84,9 @@ def get_rpm_repo(url, localdir, progress_updater):
     repodata_path = 'repodata'
     repomd_path = 'repodata/repomd.xml'
 
-    reposnap.fetch.fetchdir(url, '', localdir, False)
-
-    reposnap.fetch.fetchdir(url, repodata_path, localdir, True)
+    reposnap.fetch.fetch(url, repomd_path, localdir, False)
+    reposnap.fetch.fetch(url, repomd_path + '.asc', localdir, False)
+    reposnap.fetch.fetch(url, repomd_path + '.key', localdir, False)
 
     result = get_rpm_primary(url, repomd_path, localdir, progress_updater)
 
