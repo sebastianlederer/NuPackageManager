@@ -1,6 +1,10 @@
 function updateTips(n) {
 }
 
+function clearError(o) {
+	o.removeClass("ui-state-error")
+}
+
 function checkLength(o, n, min, max) {
 	if ( o.val().length > max || o.val().length < min ) {
 		o.addClass( "ui-state-error" );

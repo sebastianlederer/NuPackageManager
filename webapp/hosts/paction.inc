@@ -1,5 +1,6 @@
 #set($form_action="paction")
 #set($form_title="Aktion für alle Hosts eines Profils ausführen")
+#parse("$module/action-presets.vm")
 #set ($profile_names = [ "-" ])
 #foreach ($l in $sorter.sort($profiles.getAll(),"name"))
 #set($dummy=$profile_names.add($l.name))
@@ -30,8 +31,19 @@
 				<input type="radio" name="action" id="pactionCustom" value="custom"
 					style="margin-bottom: 1.5em">
 				<label for="pactionCustom">Custom</label>
-				<input name="pactionArgs" id="pactionArgs" size=25 placeholder="shell command"
-					style="margin-left:-6em; margin-top: 0.3em;display: none">
+				<select name="pactionSelection" id="pactionSelection" size=1
+					style="margin-left:-6em; margin-top: 0.3em" disabled>
+					<option>- Benutzerdefiniert -</option>
+#foreach($a in $actionPresets)
+					<option>$esc.java($a)</option>
+#end
+				</select>
+				<br>
+				<label for="pactionArgs">
+				<input type="text" name="pactionArgs" id="pactionArgs" size=23
+					style="margin-left:20em; margin-top:-1em;width:18em"
+					placeholder="shell command" disabled>
+				<div style="height:1.8em"></div>
 			</span>
 		</fieldset>
 	</form>
@@ -49,6 +61,33 @@ function form_paction_showhide() {
 		argsField.hide();
 	}
 }
+
+function form_paction_enable_fields() {
+	let argsField = $("#pactionArgs");
+	let actionField = $("#pactionSelection");
+	let radio = $("#pactionCustom:checked");
+
+	if(radio.val() == "custom") {
+		actionField.prop("disabled", false);
+
+		let s = actionField.val();
+
+		if(s[0] === "-") {
+			argsField.prop("disabled", false);
+			argsField.focus();
+		}
+		else {
+			argsField.prop("disabled", true);
+			clearError(argsField);
+		}
+	}
+	else {
+		actionField.prop("disabled", true);
+		argsField.prop("disabled", true);
+	}
+
+}
+
 function form_${form_action}_load(o) {
 	// $("input[type=radio]").checkboxradio({ icon:false });
 	if(o !== undefined)  {
@@ -62,15 +101,24 @@ function form_${form_action}_load(o) {
 	$("input#pactionArgs").val('');
 
 	$("input[name=action]").off("change");
-	$("input[name=action]").on("change", form_paction_showhide);
+	$("input[name=action]").on("change", form_paction_enable_fields);
 
-	form_paction_showhide();
+	$("input[name=pactionSelection]").off("change");
+	$("select[name=pactionSelection]").on("change", form_paction_enable_fields);
+
+	form_action_enable_fields();
 }
 
 function form_${form_action}_validate() {
         if($("#pactionCustom:checked").val() !== undefined) 
 	{
-		return checkLength($("#pactionArgs"),"args", 1, 128);
+		var rangeStart = 1;
+
+		let actionSel = $("#pactionSelection").val();
+		if(actionSel[0] !== "-")
+			rangeStart = 0;
+
+		return checkLength($("#pactionArgs"),"args", rangeStart, 128);
 	}
 	else {
 		return true;
@@ -87,7 +135,12 @@ function form_${form_action}_submit() {
 	if($("#pactionReboot:checked").val() !== undefined) action = "reboot";
 	if($("#pactionCustom:checked").val() !== undefined) {
 		action = "custom";
-		args = $("#pactionArgs").val();
+		actionSel = $("#pactionSelection").val();
+
+		if(actionSel[0] === "-")
+			args = $("#pactionArgs").val();
+		else
+			args = actionSel;
 	}
 
 	$.post("$root/$module/${form_action}-action.vm",
