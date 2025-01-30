@@ -3,7 +3,7 @@ import os
 import reposnap.getmodified as getmodified
 import reposnap.filter_href as filter_href
 
-def extendurl(url, ext):
+def extend_url(url, ext):
     parts = url.split('?')
     if len(parts) > 1:
         baseurl = parts[0]
@@ -48,7 +48,7 @@ def fetch(baseurl, path, localdir, recursive=False):
 
     createdirs(localpath)
 
-    newurl = extendurl(baseurl, path)
+    newurl = extend_url(baseurl, path)
 
     print(newurl, ' -> ', localpath)
 

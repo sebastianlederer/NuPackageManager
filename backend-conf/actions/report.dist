@@ -1,2 +1,16 @@
 [ -f /var/run/reboot-required ] && echo "##REBOOT"
-dpkg-query --show -f '${db:Status-Abbrev} ${Package} ${Version} ${Architecture}\n' | awk '/^ii / { print   $2, $3, $4 }'
+if [ -x /usr/bin/zypper ]
+then
+        zypper needs-rebooting || echo "##REBOOT"
+fi
+
+if [ -x /usr/bin/dpkg-query ]
+then
+        dpkg-query --show -f '${db:Status-Abbrev} ${Package} ${Version} ${Architecture}\n' | awk '/^ii / { print   $2, $3, $4 }'
+else
+        if [ -x /usr/bin/rpm ]
+        then
+                rpm -qa --qf '%{name} %{version}-%{release} %{arch}\n' | grep -v '(none)\|^kernel-default'
+                rpm -q kernel-default --qf '%{name} %{version}-%{release} %{arch}\n' | tail -1
+        fi
+fi
