@@ -25,7 +25,7 @@ def get_unwanted_sections():
             ls = l.strip()
             if ls == '' or ls.startswith('#'):
                 continue
-            result.append(bytes(ls,'utf8'))
+            result.append(ls)
 
     return result
 
@@ -95,6 +95,7 @@ def get_rpm_repo(url, localdir, progress_updater):
     getmodified.close_session(url)
 
     # TODO: check signature
+    return result
 
 
 def filter_packages_rpm(path, filter_sections=None):
