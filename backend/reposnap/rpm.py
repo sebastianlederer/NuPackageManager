@@ -57,6 +57,8 @@ def get_rpm_primary(url, repomd_path, localdir, progress_updater):
     location_el = data_el.find(prefix + 'location')
     primary_href = location_el.get('href')
 
+    reposnap.fetch.fetch(url, primary_href, localdir, False)
+
     primary_path = os.path.join(localdir, primary_href)
     print("primary_path:", primary_path)
     more_files = filter_packages_rpm(primary_path)
