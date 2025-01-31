@@ -254,15 +254,77 @@ def perform_custom(dbconn, host):
         return "- " + output.splitlines()[-1][:78]
 
 
+def create_repo_conf_apt(repo, pubkeys):
+    download_url = config.server_url
+    repo_path = config.repo_path
+
+    script = ""
+    if repo.arch and repo.arch != '':
+        arch_spec = "arch={}".format(repo.arch)
+    else:
+        arch_spec = ""
+
+    if repo.pubkey and repo.pubkey != "":
+        sign_spec = "signed-by=/etc/apt/keyrings/{}.gpg".format(repo.name)
+        pubkeys.append((repo.name, repo.pubkey))
+    else:
+        sign_spec = ""
+
+    if sign_spec != "" or arch_spec != "":
+        repo_opts = "[{} {}]".format(arch_spec, sign_spec)
+    else:
+        repo_opts = ""
+
+    if repo.dist and repo.dist != "":
+        dist_spec = repo.dist
+    else:
+        dist_spec = "/"
+
+    script += "deb {} {}{}{} {} {} # {}\n".format(repo_opts,
+            download_url, repo_path, str(repo.id), dist_spec, repo.component, repo.name)
+    return script
+
+
+def create_repo_conf_yum(repo, pubkeys):
+    download_url = config.server_url
+    repo_path = config.repo_path
+
+    script = ""
+
+    script += "[{}]\n".format(repo.name)
+    script += "name={}\n".format(repo.description)
+    script += "baseurl={}{}{}\n".format(repo.download_url, repo_path, str(repo.id))
+    script += "type=rpm-md\n"
+
+    if repo.pubkey and repo.pubkey != "":
+        script += "gpgcheck=1\n"
+        script += "gpgkey=file://etc/pki/rpm-gpg/RPM-GPG-KEY-{}\n".format(repo.name)
+        pubkeys.append((repo.name, repo.pubkey))
+    else:
+        script += "gpgcheck=1\n"
+        script += "gpgkey=file://etc/pki/rpm-gpg/RPM-GPG-KEY-vendor\n"
+
+    script += "enabled=1\n"
+    script += "autorefresh=1\n"
+    script += "\n"
+    return script
+
+
+def create_repo_conf(repo, pubkeys):
+    if repo.type == "apt":
+        return create_repo_conffile_apt(repo, pubkeys)
+    elif repo.type == "rpm":
+        return create_repo_conffile_yum(repo, pubkeys)
+    else:
+        return ""
+
+
 def perform_config(dbconn, host):
     download_url = config.server_url
     repo_path = config.repo_path
 
-    script = """
-        sudo sh -c "cat >/etc/apt/sources.list" <<EOF
-# automatically generated, do not edit!
-"""
-    script = config.get_scriptlet("config")
+    script = ""
+    conf_template = config.get_scriptlet("config")
 
     cursor = dbconn.cursor()
     cursor.execute("""
@@ -275,31 +337,9 @@ def perform_config(dbconn, host):
 
     cursor2 = dbconn.cursor()
     for repo in cursor.fetchall():
-        if repo.arch and repo.arch != '':
-            arch_spec = "arch={}".format(repo.arch)
-        else:
-            arch_spec = ""
-
-        if repo.pubkey and repo.pubkey != "":
-            sign_spec = "signed-by=/etc/apt/keyrings/{}.gpg".format(repo.name)
-            pubkeys.append((repo.name, repo.pubkey))
-        else:
-            sign_spec = ""
-
-        if sign_spec != "" or arch_spec != "":
-            repo_opts = "[{} {}]".format(arch_spec, sign_spec)
-        else:
-            repo_opts = ""
-
-        if repo.dist and repo.dist != "":
-            dist_spec = repo.dist
-        else:
-            dist_spec = "/"
-
-        script += "deb {} {}{}{} {} {} # {}\n".format(repo_opts,
-                download_url, repo_path, str(repo.id), dist_spec, repo.component, repo.name)
-
-    script += "EOF\n"
+        t = conf_template
+        conf = create_repo_conf(repo, pubkeys)
+        script += t.substitute({"repo":repo.name, "conf": conf})
 
     pubkey_template = string.Template(config.get_scriptlet("pubkey"))
 
