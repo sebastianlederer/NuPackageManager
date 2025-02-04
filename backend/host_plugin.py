@@ -293,7 +293,7 @@ def create_repo_conf_yum(repo, pubkeys):
 
     script += "[{}]\n".format(repo.name)
     script += "name={}\n".format(repo.description)
-    script += "baseurl={}{}{}\n".format(repo.download_url, repo_path, str(repo.id))
+    script += "baseurl={}{}{}\n".format(download_url, repo_path, str(repo.id))
     script += "type=rpm-md\n"
 
     if repo.pubkey and repo.pubkey != "":
@@ -312,9 +312,9 @@ def create_repo_conf_yum(repo, pubkeys):
 
 def create_repo_conf(repo, pubkeys):
     if repo.type == "apt":
-        return create_repo_conffile_apt(repo, pubkeys)
+        return create_repo_conf_apt(repo, pubkeys)
     elif repo.type == "rpm":
-        return create_repo_conffile_yum(repo, pubkeys)
+        return create_repo_conf_yum(repo, pubkeys)
     else:
         return ""
 
@@ -324,11 +324,11 @@ def perform_config(dbconn, host):
     repo_path = config.repo_path
 
     script = ""
-    conf_template = config.get_scriptlet("config")
+    conf_template = string.Template(config.get_scriptlet("config"))
 
     cursor = dbconn.cursor()
     cursor.execute("""
-    SELECT r.id, r.name, u.dist, u.component, u.arch, u.pubkey FROM repository as r, repository as r_o, upstream_repo as u WHERE r.id IN
+    SELECT r.id, r.name, r.description, u.type, u.dist, u.component, u.arch, u.pubkey FROM repository as r, repository as r_o, upstream_repo as u WHERE r.id IN
         (SELECT repo FROM profile_repo WHERE profile=(SELECT profile FROM host WHERE id=%s))
     AND r.origin = r_o.id AND r_o.upstream = u.id
     """, (host.id,))
