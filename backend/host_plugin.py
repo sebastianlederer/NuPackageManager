@@ -292,7 +292,10 @@ def create_repo_conf_yum(repo, pubkeys):
     script = ""
 
     script += "[{}]\n".format(repo.name)
-    script += "name={}\n".format(repo.description)
+    desc = repo.name
+    if repo.description != '':
+        desc = repo.description
+    script += "name={}\n".format(desc)
     script += "baseurl={}{}{}\n".format(download_url, repo_path, str(repo.id))
     script += "type=rpm-md\n"
 
@@ -325,6 +328,7 @@ def perform_config(dbconn, host):
 
     script = ""
     conf_template = string.Template(config.get_scriptlet("config"))
+    cleanconf_template = string.Template(config.get_scriptlet("cleanconfig"))
 
     cursor = dbconn.cursor()
     cursor.execute("""
@@ -334,17 +338,24 @@ def perform_config(dbconn, host):
     """, (host.id,))
 
     pubkeys = []
-
-    cursor2 = dbconn.cursor()
+    repos = []
     for repo in cursor.fetchall():
-        t = conf_template
         conf = create_repo_conf(repo, pubkeys)
-        script += t.substitute({"repo":repo.name, "conf": conf})
+        repos.append(repo.name)
+        script += conf_template.substitute({"repo":repo.name, "conf": conf})
 
     pubkey_template = string.Template(config.get_scriptlet("pubkey"))
 
     for name, pubkey in pubkeys:
         script += pubkey_template.substitute({"repo":name, "pubkey":pubkey})
+
+    repolist = " ".join(repos)
+    cleanconf_script = cleanconf_template.substitute({"repos":repolist})
+
+    print(cleanconf_script)
+    exitcode, output = remote_command(host, cleanconf_script)
+    if exitcode != 0:
+        print(exitcode, output)
 
     print(script)
 

@@ -1,0 +1,27 @@
+repo_list="$repos"
+if [ -d /etc/apt ]
+then
+	cd /etc/apt/sources.list.d
+	disable_repos="bareos.sources ubuntu.sources ubuntu.sources.curtin"
+	for d in $$disable_repos
+	do
+		sudo mv $$d $$d.orig
+	done
+	if [ -s /etc/apt/sources.list ]
+	then
+		sudo truncate --size 0 /etc/apt/sources.list
+	fi
+fi
+
+if [ -d /etc/zypp ]
+then
+	cd /etc/zypp/repos.d
+	for r in $$(ls *.repo)
+	do
+		if [ ! -f nupama.$$r.repo ]
+		then
+			reponame=$$(grep '^\[' $$r | tr -d [])
+			sudo zypper mr -d $$reponame
+		fi
+	done
+fi

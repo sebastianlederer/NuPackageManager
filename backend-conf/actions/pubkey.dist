@@ -1,12 +1,15 @@
 if [ -d /etc/apt ]
 then
-sudo gpg --no-default-keyring --keyring /etc/apt/keyrings/$repo.gpg --import <<EOF
+	sudo gpg --no-default-keyring --keyring /etc/apt/keyrings/$repo.gpg --import <<EOF
 $pubkey
 EOF
 fi
-if [ -d /etc/pki/rpm-gpg ]
+
+if [ -d /etc/zypp ]
 then
-	sudo cat >/etc/pki/rpm-gpg/RPM-GPG-KEY-$repo.gpg <<EOF
+	sudo mkdir -p /etc/pki/rpm-gpg
+	sudo sh -c "cat >/etc/pki/rpm-gpg/$repo.gpg" <<EOF
 $pubkey
 EOF
+	sudo rpm --import /etc/pki/rpm-gpg/$repo.gpg
 fi

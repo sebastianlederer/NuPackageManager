@@ -1,3 +1,12 @@
-sudo sh -c "cat >/etc/apt/sources.list" <<EOF
+if [ -d /etc/apt ]
+then
+	sudo sh -c "cat >/etc/apt/sources.list.d/nupama.$repo.list" <<EOF
 $conf
 EOF
+fi
+if [ -d /etc/zypp/repos.d ]
+then
+	sudo sh -c "cat >/etc/zypp/repos.d/nupama.$repo.repo" <<EOF
+$conf
+EOF
+fi

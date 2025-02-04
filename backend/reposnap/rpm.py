@@ -53,12 +53,13 @@ def get_rpm_primary(url, repomd_path, localdir, progress_updater):
         root = ET.parse(f)
 
     prefix = '{http://linux.duke.edu/metadata/repo}'
-    data_els = root.find(prefix+"data")
+    data_els = root.findall(prefix+"data")
     primary_href = 'not found'
     for data_el in data_els:
+        typeattr = data_el.get('type')
+        print(typeattr)
         location_el = data_el.find(prefix + 'location')
         href = location_el.get('href')
-        typeattr = data_el.get('type')
         if typeattr == 'primary':
             primary_href = href
         reposnap.fetch.fetch(url, href, localdir, False)
