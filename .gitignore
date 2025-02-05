@@ -4,4 +4,5 @@ lib
 *.jar
 *.class
 *.zip
+build.properties
 **/__pycache__

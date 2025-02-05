@@ -38,6 +38,15 @@ EOF
 	schema_version=4
 fi
 
+if [ "$schema_version" = 4 ]
+then
+	:
+	$psql -q -t -A <<EOF
+	ALTER TABLE upstream_repo ALTER COLUMN url TYPE VARCHAR(500);
+	UPDATE config SET value=5 WHERE key='schema_version';
+EOF
+	schema_version=5
+fi
 if [ "$orig_schema_version" != "$schema_version" ]
 then
 	echo upgraded schema version to $schema_version.

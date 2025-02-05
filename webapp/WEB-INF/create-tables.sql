@@ -47,7 +47,7 @@ CREATE TABLE upstream_repo (
 	id SERIAL PRIMARY KEY,
 	name VARCHAR(80) NOT NULL UNIQUE,
 	description VARCHAR(130),
-	url VARCHAR(250),
+	url VARCHAR(500),
 	dist VARCHAR(80),
 	component VARCHAR(40),
 	arch VARCHAR(40),

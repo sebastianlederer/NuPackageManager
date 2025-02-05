@@ -93,7 +93,10 @@ def get_rpm_repo(url, localdir, progress_updater):
 
     reposnap.fetch.fetch(url, repomd_path, localdir, False)
     reposnap.fetch.fetch(url, repomd_path + '.asc', localdir, False)
-    reposnap.fetch.fetch(url, repomd_path + '.key', localdir, False)
+    try:
+        reposnap.fetch.fetch(url, repomd_path + '.key', localdir, False)
+    except Exception as e:
+        pass
 
     result = get_rpm_primary(url, repomd_path, localdir, progress_updater)
 
