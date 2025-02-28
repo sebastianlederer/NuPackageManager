@@ -63,6 +63,7 @@ Here is a list of files you need to prepare in this way:
 * tomcat/conf/server.xml.dist
 * tomcat/conf/tomcat-users.xml.dist
 * tomcat/nupama-tomcat.properties.dist
+* tomcat/webapps/nupama/hosts/action-presets.inc.dist
 * tomcat/webapps/nupama/WEB-INF/tools.xml.dist
 * tomcat/webapps/nupama/WEB-INF/web.xml.dist
 * tomcat/webapps/nupama/META-INF/context.xml.dist
@@ -72,6 +73,7 @@ Here is a list of files you need to prepare in this way:
 * conf/actions/pubkey.dist
 * conf/actions/report.dist
 * conf/actions/config.dist
+* conf/actions/cleanconfig.dist
 * conf/actions/upgrade.dist
 * conf/backend.conf.dist
 
@@ -82,7 +84,7 @@ Here is a list of files you need to prepare in this way:
 > * tomcat/nupama-tomcat.properties - set server.location to your install directory
 > * tomcat/conf/server.xml.dist - set up authentication, or delegate it to reverse proxy
 > * tomcat/conf/tomcat-users.xml.dist - set up users and groups if you use Tomcat builtin authentication
-
+> * tomcat/webapps/nupama/hosts/action-presets.inc.dist
 Backend Configuration
 ----------------------
 ### SSH identity
@@ -125,20 +127,33 @@ files *conf/apt.blacklist* and *conf/rpm.blacklist* respectively.
 ### Action Scripts
 Action scripts are executed on the managed hosts when an action is requested
 via the web interface (e.g. "report" or "upgrade"). The content of the
-action script is fed as standard input to the remote shell via SSH. In some cases
-("config" and "pubkey"), additional data is appended to the action script file
-contents, that is, the generated content for repo keys or repo configuration.
+action script is fed as standard input to the remote shell via SSH.
+In some cases (*config*, *cleanconfig*, *pubkey*), a simple templating
+mechanism is used. The variables *repo*, *conf*, *repos*, and *pubkey* can
+be referenced with a preceeding dollar sign. If you want to include a literal
+dollar sign inside a template, use a double dollar sign.
+
 Action scripts are stored in the *conf/actions* subdirectory.
 
 * *config* is used to create the repository configuration - for APT repositories, this
-   writes the file */etc/apt/sources.list*
-* *pubkey* installs a repository signing key, if there is one
+   writes files under  */etc/apt/sources.list.d*. It is called once per repository. On each call,
+   the variables *repo* and *conf* are set accordingly.
+* *cleanconfig* removes repositories which are no longer configured for a managed host - it is executed once per host and gets the template variable *repos*
+* *pubkey* installs a repository signing key, if there is one. It is called once per repository.
+   On each call, the variables *repo* and *pubkey* are set.
 * *reboot* reboots the target machine
 * *report* creates a report of all installed packages - this script must output
    a line for each package with three space-separated fields: Package name, version
   and architecture
 * *upgrade* executes an upgrade command on the target machine - for APT repositories,
    this is the command *apt update && apt upgrade*
+
+#### Variables
+* *repo* contains the name of the current repository
+* *pubkey* contains the base64-encoded public key of the repository, if there is one
+* *conf* contains the repository configuration text for the current repository, e.g. the line for an
+APT source configuration
+* *repos* contains a string will all repositories configured for a managed host, separated by spaces
 
 ### Timeouts
 The connection timeout for SSH connections can be set with *ssh_timeout*
@@ -159,6 +174,34 @@ Tomcat and servlet configuration mechanisms apply.
 Important configuration files are:
 * Tomcat configuration: ports, authentication in *tomcat/conf/server.xml*
 * Database connection (e.g. set a different password) in *tomcat/webapps/nupama/META-INF/context.xml*
+
+### Actions
+In the *Hosts* view, you can issue actions for managed hosts, either by selecting a single host,
+multi-selection or by selecting a profile.
+
+Standard host actions are:
+* *Report* - retrieve information about installed packages and available updates
+* *Configure* - configure the package management (e.g. APT or DNF) on the managed host to
+  use the repositories from Nupama
+* *Update* - execute pending updates - will also execute *configure* and *report*
+* *Reboot* - reboot the managed host
+* *Custom* - execute a user-specified command
+
+### Custom Actions
+For the *Custom* action, you can configure multiple presets which can be
+selected from a drop-down menu instead of typing a command.
+
+The custom actions are defined in the file *tomcat/webapps/nupama/hosts/action-presets.inc*.
+
+The file uses the *Velocity* macro language to set an array variable comprised of strings.
+
+Example:
+<code>
+#set($actionPresets = [
+"echo test;false",
+"sleep 10"
+]
+</code>
 
 Authentication
 ---------------
