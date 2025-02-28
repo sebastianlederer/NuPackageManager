@@ -97,7 +97,7 @@
 <DIV class="ui-layout-north">#parse("menu.vm")&nbsp;
 <span class="menu"><input class="menu" type="checkbox" name="showgroup" value="showupdates" #if($params.show=="updates") checked #end id="showupdates">
 nur Updates anzeigen</span>
-#taskstatus($module, "id")
+#taskstatus($module, "id", "repoid=${params.repoid}$showupd")
 #searchbox()
 <div id="ajaxBusy" class="ajaxBusy"><img class="ajaxBusy" src="$root/images/loading.gif"></div>
 </DIV>

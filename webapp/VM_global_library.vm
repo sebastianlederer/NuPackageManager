@@ -279,7 +279,7 @@ $response.setStatus(409)
 #end
 #end
 
-#macro(taskstatus $module $id)
+#macro(taskstatus $module $id $jsonkey)
 #set($s=$status.defaultStatus)
 &nbsp;&nbsp;&nbsp;&nbsp;
 <span id="task_progress" class="greynumber-big"></span>
@@ -293,7 +293,11 @@ function updateTaskStatus() {
 		$('#task_progress').html(p);
 		$('#task_status').html(data.task + ' ' + data.message);
 		if(oldmsg !== '' && data.message === '') {
+#if($jsonkey)
+#			#js_load_data_key($module $id $jsonkey)
+#else
 			#js_load_data($module $id)
+#end
 		}
 	});
 }

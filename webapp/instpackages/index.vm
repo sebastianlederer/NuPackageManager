@@ -1,5 +1,5 @@
 #set ($layout = "grid.vm" )
-#set ($module = "packages")
+#set ($module = "instpackages")
 #set($disablebuttons=false)
 #if($params.show=='updates')
 #set($showupdates=true)
@@ -95,7 +95,7 @@
 <DIV class="ui-layout-north">#parse("menu.vm")&nbsp;
 <span class="menu"><input class="menu" type="checkbox" name="showgroup" value="showupdates" #if($params.show=="updates") checked #end id="showupdates">
 nur Updates anzeigen</span>
-#taskstatus($module, "name")
+#taskstatus($module, "name", "hostid=${params.hostid}$!showinst")
 #searchbox()
 <div id="ajaxBusy" class="ajaxBusy"><img class="ajaxBusy" src="$root/images/loading.gif"></div>
 </DIV>
