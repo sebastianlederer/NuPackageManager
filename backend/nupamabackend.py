@@ -111,8 +111,11 @@ def main():
 
     while reconnect:
         if dbconn is None or dbconn.closed:
-            dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
             time.sleep(5)
+            try:
+                dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
+            except psycopg2.OperationalError as e:
+                print("database connection failed", e)
 
         if cmd == "watch":
             print("database connection established", dbconn)

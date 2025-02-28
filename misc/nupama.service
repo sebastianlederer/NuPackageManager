@@ -1,9 +1,11 @@
 [Unit]
 Description=The background service for Nupama
 After=network.target
+After=postgresql.service
 
 [Service]
 Type=forking
+RuntimeDirectory=nupama
 PIDFile=/var/run/nupamabackend.pid
 User=root
 ExecStart=/opt/dass-it/nupama/backend/ctl start
