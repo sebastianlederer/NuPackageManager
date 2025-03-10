@@ -281,6 +281,6 @@ def fetch_repo(url, localdir, dist, components, archs = None,
             filter_regex,
             progress_updater))
 
-    getmodified.close_session(url)
+    getmodified.close_session()
 
     return result

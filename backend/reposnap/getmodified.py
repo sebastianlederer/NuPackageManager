@@ -35,7 +35,7 @@ def get_session():
     return session
 
 
-def close_session(url):
+def close_session():
     global cached_session
     if cached_session is not None:
         cached_session.close()
@@ -84,6 +84,10 @@ def get_modified(url, oldfilepath):
         pass
 
     resp = http_request('GET', url, headers)
+
+    if resp is None:
+        return False
+
     m_stamp = None
 
     if resp.status_code >=400:

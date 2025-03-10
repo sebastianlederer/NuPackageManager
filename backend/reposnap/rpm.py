@@ -100,7 +100,7 @@ def get_rpm_repo(url, localdir, progress_updater):
 
     result = get_rpm_primary(url, repomd_path, localdir, progress_updater)
 
-    getmodified.close_session(url)
+    getmodified.close_session()
 
     # TODO: check signature
     return result

@@ -116,6 +116,7 @@ def main():
                 dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
             except psycopg2.OperationalError as e:
                 print("database connection failed", e)
+                continue
 
         if cmd == "watch":
             print("database connection established", dbconn)
@@ -123,8 +124,10 @@ def main():
         elif cmd == "schedule":
             process_schedule(dbconn, sys.argv[2])
             reconnect = False
-
-    dbconn.close()
+    try:
+        dbconn.close()
+    except:
+        pass
 
 
 if __name__ == "__main__":
