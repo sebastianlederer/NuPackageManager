@@ -125,6 +125,7 @@ CREATE TABLE installed_pkg (
 	flags VARCHAR(16),
 	PRIMARY KEY (name, arch, host)
 );
+CREATE INDEX ON installed_pkg (host);
 
 CREATE TABLE profile_repo (
 	profile INTEGER REFERENCES profile(id),

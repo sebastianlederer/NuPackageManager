@@ -41,7 +41,7 @@ def update_host_status(dbconn, id, result):
         dbconn.commit()
 
 
-def crs_get_latest_packages(cursor, host, fromorigin=False):
+def crs_get_latest_packages(cursor, host):
     cursor.execute("""
         SELECT * FROM package WHERE repo in (
             SELECT repo FROM profile_repo WHERE profile=%s
@@ -49,30 +49,38 @@ def crs_get_latest_packages(cursor, host, fromorigin=False):
     """, (host.profile,))
 
     latest_packages = {}
+    latest_packages_origin = {}
 
     c = dpkg_cmp.VersionComparator()
 
     for r in cursor:
         if r.name in latest_packages:
             other_version = latest_packages[r.name]
-            if fromorigin:
-                this_version = r.vers_origin
-            else:
-                this_version = r.version
+            this_version = r.version
 
             if this_version is not None:
                 if c.compare(this_version, other_version) == 1:
                     latest_packages[r.name] = this_version
         else:
             latest_packages[r.name] = r.version
-    return latest_packages
+
+        if r.name in latest_packages_origin:
+            other_version = latest_packages_origin[r.name]
+            this_version = r.vers_origin
+
+            if this_version is not None:
+                if c.compare(this_version, other_version) == 1:
+                    latest_packages_origin[r.name] = this_version
+        else:
+            latest_packages_origin[r.name] = r.version
+
+    return latest_packages, latest_packages_origin
 
 
 def crs_update_pkg_versions(cursor, host):
     print("updating pkg versions for host",host.name)
 
-    latest_packages = crs_get_latest_packages(cursor, host)
-    latest_packages_origin = crs_get_latest_packages(cursor, host, fromorigin=True)
+    latest_packages, latest_packages_origin = crs_get_latest_packages(cursor, host)
 
     cursor.execute("""
         SELECT * FROM installed_pkg WHERE host=%s
