@@ -219,3 +219,29 @@ localhost by modifying the *Connector* configuration.
 It is also possible to let Tomcat do HTTPS encryption by configuring a
 *Connector* with *SSLEnable="true"*. You may then have to deal with preparing a Java
 keystore with the certificates, though.
+
+Miscellaneous
+===================
+Metadata Expiration
+-------------
+When mirroring APT repositories, the problem of metadata expiration is a common occurrence.
+Many APT repositories have the Valid-Until attribute set in their metadata, to prevent
+installation of outdated packages and replay attacks. If you do not need to update a mirrored
+repository for some time, a managed system might produce an error during an *apt update* like the
+following:
+<code>
+E: Release file expired, ignoring https://myreposerver/repos/repo15/dists/bookworm/Release (invalid since ...)
+</code>
+
+To solve this problem, you could resync the mirror repository and push the updates forward.
+
+You can also configure a grace period on the managed system by changing the APT configuration.
+For example, to set a grace period of half a year, you can create a file */etc/apt/apt.conf.d* with the following content:
+<code>
+Acquire::Min-ValidTime 15811200;
+</code>
+
+You could also switch off the expiration check completely (not recommended) with this line:
+<code>
+Acquire::Check-Valid-Until false;
+</code>
