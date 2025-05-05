@@ -245,3 +245,48 @@ You could also switch off the expiration check completely (not recommended) with
 <code>
 Acquire::Check-Valid-Until false;
 </code>
+
+HTTP 404 Errors
+---------------
+If you encounter HTTP 404 Errors when installing/upgrading packages,
+you probably attempted to download a package that is blacklisted.
+
+Since the metadata is not modified, blacklisted packages will
+still be listed as available on the managed system. Therefore,
+it can happen that dnf/apt tries to install a package that
+is not there.
+
+In that case, you need to update your blacklist, then mirror and
+update all relevant repositories. Find out which repository the
+missing package belongs to, e.g. by matching the download URL
+to the repository ID. Check the metadata manually for the
+package group or section.
+
+### YUM Repositories 
+If the package is already installed on the managed system, you can print
+the *Group* attribute with the following command:
+<code>
+rpm -q --qf '%{NAME} %{GROUP}\n' *package-name*
+</code>
+
+Otherwise, the metadata file
+will be the latest file with a name ending in *primary.xml.gz*.
+The relevant line starts with *<rpm:group>*.
+
+### APT Repositories
+If the package is already
+installed on the managed system, you can print the *Section* attribute
+with the following command:
+<code>
+dpkg-query --show -f '${Package} ${Section}\n' *package-name*
+</code>
+
+Otherwise, the metadata file will be *Packages.gz* or *Packages.xz*
+within a subdirectory, e.g. *dists/bookworm/main/binary.amd64/Packages.gz*.
+The relevant line starts with *Section:*.
+
+When you have determined the group/section, modify the configuration files
+*conf/rpm.blacklist* or *conf/apt.blacklist* accordingly.
+Please note that lines appearing in the blacklist files (and that are not commented out)
+are being used to filter out packages. So you want to remove the line with
+the section/group name that you have determined in the previous steps.
