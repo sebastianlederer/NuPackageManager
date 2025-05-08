@@ -140,7 +140,7 @@ public class RepositoryService {
 		}
 
 		for (ProfileRepo prepo : result) {
-			repo = prepo.getRepo();
+			repo = addDaos(prepo.getRepo());
 			try {
 				dao.refresh(repo);
 			} catch (SQLException e) {
