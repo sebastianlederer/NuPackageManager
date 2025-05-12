@@ -87,20 +87,20 @@
 			let approved=false;
 			let enable_mirror=false;
 	   		row_ids = grid.getSelectedRows();
+			console.log(row_ids);
 			if(row_ids.length > 0) {
 				var o = dataView.getItem(row_ids[0]);
 				something_selected=true;
 
+				console.log(o);
+
 				// determine if origin package list has been approved
 				if(o.pred_id!=null) {
-					let pred=null;
-					pred=dataView.getItemById(o.pred_id);
-					if(pred) {
-						console.log(pred.name + " " + pred.approvalRequired + " " + pred.approved)
-						disable_update = o.pred==null || (o.approvalRequired==true && pred.approved==false)
-					}
+					disable_update = (o.pred_appr_reqd==true && o.pred_approved==false)
 				}
 				enable_mirror=(o.upstream != null && o.upstream != "") ;
+				console.log(o.pred_id);
+				console.log(disable_update);
 			}
 #if(!$disablebuttons)
 			$("#button-edit").button("option","disabled", something_selected==false);
@@ -170,7 +170,9 @@
 #else
 <button id="button-update">Aktualisieren</button>
 #end
+#if(!$viaprofile)
 <button id="button-mirror">Jetzt spiegeln</button>
+#end
 </div>
 </DIV>
 #parse("$module/new.inc")

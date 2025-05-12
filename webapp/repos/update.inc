@@ -26,6 +26,9 @@ Dieser Vorgang lässt sich nicht rückgängig machen.</p>
 		
 #end
 	}
-
+#if($viaprofile)
+	#js_form_submit("update", "repos", "id", "profile=$params.profile")
+#else
 	#js_form_submit("update", "repos", "id")
+#end
 </script>

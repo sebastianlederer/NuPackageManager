@@ -386,7 +386,7 @@ $!_p.value#end
 	}
 #end
 
-#macro(js_form_submit $name $module $id)
+#macro(js_form_submit $name $module $id $extra_key)
 function form_${name}_submit() {
 	var fields = $("#form-${name} input, #form-${name} select, #form-${name} textarea");
 	var values = {};
@@ -405,7 +405,11 @@ function form_${name}_submit() {
 
 	$.post("$root/$module/${name}-action.vm", values)
 	.done(function() {
+#if($extra_key)
+		#js_load_data_key($module, $id, $extra_key)
+#else
 		#js_load_data($module, $id)
+#end
 	})
 	.fail(function(response) {
 		alert("$module $name: " + response.responseText);

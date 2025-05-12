@@ -50,7 +50,7 @@
 			$("#button-rename").button("option","disabled",false);
 			$("#button-delete").button("option","disabled",false);
 #end
-#if(false)
+#if(true)
 			$("#button-view").button("option","disabled",false);
 #end
 #if($properties_button)
@@ -67,7 +67,7 @@
 #js_dialog_form("edit" "Save" "ui-icon-pencil" true false)
 #js_dialog_form("rename" "Rename" "ui-icon-tag" true false)
 #js_dialog_form("delete" "Delete" "ui-icon-minus" true false)
-#if(false)
+#if(true)
 		$("#button-view").button({disabled: true, icons:{ primary: "ui-icon-zoomin"}})
 			.click(function() {
 				var row=grid.getSelectedRows()[0];
@@ -101,7 +101,9 @@
 <button id="button-rename">Umbenennen</button>
 <button id="button-delete">Löschen</button>
 <span>&nbsp;</span>
-<!-- <button id="button-view">Paketlisten</button> -->
+#if(true)
+<button id="button-view">Repositories</button>
+#end
 #if($properties_button)
 <button id="button-properties">Attribute</button>
 #end
