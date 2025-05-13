@@ -1,5 +1,5 @@
 #!/bin/sh
-psql="psql -U nupama nupama -h localhost"
+psql="psql -U nupama nupama"
 schema_version=$($psql -q -t -A -c "SELECT value FROM config WHERE key='schema_version'")
 schema_version=$schema_version
 orig_schema_version=$schema_version

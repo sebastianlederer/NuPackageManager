@@ -110,7 +110,7 @@
   <target name="prepare-build" depends="fetch-tomcat,resolve"/>
   <target name="dist" depends="jar">
     <zip destfile="nupama.zip">
-      <zipfileset dir="backend" prefix="nupama/backend"/>
+      <zipfileset dir="backend" prefix="nupama/backend" excludes="**/__pycache__/*, **/__pycache__" />
       <zipfileset file="misc/ctl" fullpath="nupama/backend/ctl" filemode="755"/>
       <zipfileset file="misc/schedule" fullpath="nupama/backend/schedule" filemode="755"/>
       <zipfileset dir="misc" prefix="nupama/misc" excludes="ctl,schedule"/>

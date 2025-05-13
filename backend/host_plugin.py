@@ -72,7 +72,7 @@ def crs_get_latest_packages(cursor, host):
                 if c.compare(this_version, other_version) == 1:
                     latest_packages_origin[r.name] = this_version
         else:
-            latest_packages_origin[r.name] = r.version
+            latest_packages_origin[r.name] = r.vers_origin
 
     return latest_packages, latest_packages_origin
 

@@ -3,12 +3,13 @@ prg=nupamabackend
 LANG=de_DE.UTF-8
 export PATH LANG
 unset LC_ALL LC_MESSAGES
+pidpath=/var/run/nupama/$prg.pid
 
 cd $(dirname $0)
 
-if [ -r /var/run/$prg.pid ]
+if [ -r $pidpath ]
 then
-  oldpid=$(cat /var/run/$prg.pid)
+  oldpid=$(cat $pidpath)
   if kill -0 $oldpid 2>/dev/null
   then
 	status="pid $oldpid is running"
@@ -40,4 +41,4 @@ then
 fi
 
 exec setsid python3 -u nupamabackend.py watch >>/var/log/$prg.log </dev/null 2>&1 &
-echo $! >/var/run/$prg.pid
+echo $! >$pidpath
