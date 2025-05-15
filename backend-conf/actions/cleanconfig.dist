@@ -25,3 +25,20 @@ then
 		fi
 	done
 fi
+
+if [ -f /etc/dnf/dnf.conf ]
+then
+	cd /etc/yum.repos.d
+	for r in $$(dnf repolist --enabled | awk '{ print $$1 }')
+	do
+		if [ "$$r" = repo ]
+		then
+			continue
+		fi
+
+		if [ ! -f nupama.$$r.repo ]
+		then
+			sudo dnf config-manager --disable $$r
+		fi
+	done
+fi

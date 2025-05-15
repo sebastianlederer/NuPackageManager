@@ -88,8 +88,8 @@
     <mkdir dir="${installdir}/tomcat"/>
     <copy todir="${installdir}/tomcat">
       <fileset dir="tomcat-conf"/>
-      <fileset file="nupama-tomcat.properties"/>
-      <fileset file="nupama-tomcat.xml"/>
+      <fileset file="nupama-tomcat.properties.dist"/>
+      <fileset file="nupama-tomcat.xml.dist"/>
     </copy>
     <copy todir="${installdir}/conf">
       <fileset dir="backend-conf">
@@ -121,7 +121,7 @@
       <zipfileset dir="lib" excludes="javax.servlet-api*" prefix="nupama/tomcat/webapps/nupama/WEB-INF/lib"/>
       <zipfileset src="downloads/${tomcat.file}" prefix="nupama/tomcat/lib"/>
       <zipfileset file="nupama-tomcat.xml" fullpath="nupama/tomcat/nupama-tomcat.xml"/>
-      <zipfileset file="nupama-tomcat.properties" fullpath="nupama/tomcat/nupama-tomcat.properties.dist"/>
+      <zipfileset file="nupama-tomcat.properties.dist" fullpath="nupama/tomcat/nupama-tomcat.properties.dist"/>
     </zip> 
   </target>
 

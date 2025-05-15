@@ -3,6 +3,8 @@
 import os
 import sys
 import gzip
+import lzma
+import re
 import xml.etree.ElementTree as ET
 import reposnap.fetch
 import reposnap.getmodified as getmodified
@@ -92,7 +94,10 @@ def get_rpm_repo(url, localdir, progress_updater):
     repomd_path = 'repodata/repomd.xml'
 
     reposnap.fetch.fetch(url, repomd_path, localdir, False)
-    reposnap.fetch.fetch(url, repomd_path + '.asc', localdir, False)
+    try:
+        reposnap.fetch.fetch(url, repomd_path + '.asc', localdir, False)
+    except Exception as e:
+        pass
     try:
         reposnap.fetch.fetch(url, repomd_path + '.key', localdir, False)
     except Exception as e:
@@ -106,14 +111,18 @@ def get_rpm_repo(url, localdir, progress_updater):
     return result
 
 
-def filter_packages_rpm(path, filter_sections=None):
+def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
     results = []
 
     if filter_sections is None:
         filter_sections = get_unwanted_sections()
+    if filter_regex is None:
+        filter_regex = get_unwanted_regex()
 
     if path.endswith(".gz"):
         open_func = gzip.open
+    elif path.endswith(".xz"):
+        open_func = lzma.open
     else:
         open_func = open
 
@@ -143,16 +152,18 @@ def filter_packages_rpm(path, filter_sections=None):
         epoch = v.get("epoch")
         ver = v.get("ver")
         rel = v.get("rel")
-        if epoch != "0":
+        if epoch is not None and epoch != "0":
             version = "{}:{}-{}".format(epoch,ver,rel)
         else:
             version = "{}-{}".format(ver,rel)
 
         format = e.find("metadata:format", namespaces)
         group = format.find("rpm:group", namespaces)
+
         if group.text in filter_sections:
             continue
-
+        if filter_regex is not None and filter_regex.match(name):
+            continue
         if href is not None:
             results.append((href, name, version, arch, description))
 

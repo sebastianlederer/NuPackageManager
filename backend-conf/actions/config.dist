@@ -10,3 +10,9 @@ then
 $conf
 EOF
 fi
+if [ -d /etc/yum.repos.d ]
+then
+	sudo sh -c "cat >/etc/yum.repos.d/nupama.$repo.repo" <<EOF
+$conf
+EOF
+fi

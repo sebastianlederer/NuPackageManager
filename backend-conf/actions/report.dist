@@ -4,13 +4,22 @@ then
 	zypper needs-rebooting || echo "##REBOOT"
 fi
 
+if [ -x /usr/bin/needs-restarting ]
+then
+	needs-restarting -r || echo "##REBOOT"
+fi
+
 if [ -x /usr/bin/dpkg-query ]
 then
 	dpkg-query --show -f '${db:Status-Abbrev} ${Package} ${Version} ${Architecture}\n' | awk '/^ii / { print   $2, $3, $4 }'
 else
 	if [ -x /usr/bin/rpm ]
 	then
-		rpm -qa --qf '%{name} %{version}-%{release} %{arch}\n' | grep -v '(none)\|^kernel-default'
-		rpm -q kernel-default --qf '%{name} %{version}-%{release} %{arch}\n' | tail -1
+		multi_packages="kernel kernel-modules-core kernel-core kernel-modules kernel-tools-libs kernel-tools"
+		rpm -qa --qf '%{name} %|EPOCH?{%{epoch}:}:{}|%{version}-%{release} %{arch}\n' | sed -e 's/ 0:/ /' |grep -v '(none)\|^kernel-.*\|^kernel '
+		for p in $multi_packages
+		do
+			rpm -q $p --qf '%{name} %{version}-%{release} %{arch}\n' | tail -1
+		done
 	fi
 fi

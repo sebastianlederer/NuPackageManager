@@ -7,3 +7,7 @@ if [ -x /usr/bin/zypper ]
 then
 	sudo zypper up --no-recommends -y
 fi
+if [ -f /etc/dnf/dnf.conf ]
+then
+	sudo dnf update -y
+fi

@@ -179,8 +179,8 @@ def command_output(cmd, script):
 
 
 def remote_command(host, script):
-    cmd = '/usr/bin/ssh -o ConnectTimeout={} -o PasswordAuthentication=no -i {} -T {}@{}'.format(
-                config.ssh_timeout, config.ssh_key, config.ssh_user,  host.name)
+    cmd = '/usr/bin/ssh -o ConnectTimeout={} -o PasswordAuthentication=no -i {} -T {} {}@{}'.format(
+                config.ssh_timeout, config.ssh_key, config.ssh_options, config.ssh_user, host.name)
     return command_output(cmd, script)
 
 
@@ -402,14 +402,14 @@ def describe_action(dbconn, host):
     if len(host.action) > 1:
         result += 's'
 
+    if 'C' in host.action:
+        result += ' config'
     if 'U' in host.action:
         result += ' upgrade'
     if 'R' in host.action:
         result += ' report'
     if 'B' in host.action:
         result += ' reboot'
-    if 'C' in host.action:
-        result += ' config'
     if 'M' in host.action:
         result += ' custom cmd'
 
