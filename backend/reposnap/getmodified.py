@@ -71,7 +71,7 @@ def http_request(method, url, headers):
 def get_modified(url, oldfilepath):
     modified = False
 
-    headers = {}
+    headers = None
     try:
         stats = os.stat(oldfilepath)
         m_stamp = stats.st_mtime
@@ -91,6 +91,7 @@ def get_modified(url, oldfilepath):
     m_stamp = None
 
     if resp.status_code >=400:
+        print("error response text:",resp.text)
         raise http.client.HTTPException("fetching {}: status {}".format(url, resp.status_code))
 
     if resp.status_code != 304:

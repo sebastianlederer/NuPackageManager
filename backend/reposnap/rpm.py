@@ -4,6 +4,7 @@ import os
 import sys
 import gzip
 import lzma
+import bz2
 import re
 import xml.etree.ElementTree as ET
 import reposnap.fetch
@@ -123,6 +124,8 @@ def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
         open_func = gzip.open
     elif path.endswith(".xz"):
         open_func = lzma.open
+    elif path.endswith(".bz2"):
+        open_func = bz2.open
     else:
         open_func = open
 
