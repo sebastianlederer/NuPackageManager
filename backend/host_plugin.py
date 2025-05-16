@@ -205,6 +205,8 @@ def perform_report(dbconn, host):
         else:
             try:
                 name, version, arch = clean_l.split(" ")
+                if len(arch) > 8:
+                    raise Exception('malformed line')
                 pkgs.append((name, version, arch))
             except:
                 print("malformed line:",clean_l)
@@ -380,17 +382,29 @@ def call_action_hook(host):
         cmd = '{} {} {} {}'.format(config.action_hook, host.name, host.action, host.action_args)
 
 
+def result_ok(res):
+    return res == "OK"
+
+
 def perform_action(dbconn, host):
     call_action_hook(host)
 
     if 'C' in host.action:
         result = perform_config(dbconn, host)
+        if not result_ok(result):
+            return result
     if  'U' in host.action:
         result = perform_upgrade(dbconn, host)
+        if not result_ok(result):
+            return result
     if 'R' in host.action:
         result = perform_report(dbconn, host)
+        if not result_ok(result):
+            return result
     if 'B' in host.action:
         result = perform_reboot(dbconn, host)
+        if not result_ok(result):
+            return result
     if 'M' in host.action:
         result = perform_custom(dbconn, host)
 
