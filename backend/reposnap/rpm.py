@@ -165,7 +165,7 @@ def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
 
         if group.text in filter_sections:
             continue
-        if filter_regex is not None and filter_regex.match(name):
+        if filter_regex is not None and filter_regex.match(name + "-" + version):
             continue
         if href is not None:
             results.append((href, name, version, arch, description))

@@ -1,0 +1,10 @@
+/var/log/nupamabackend.log {
+    missingok
+    notifempty
+    rotate 2
+    weekly
+    create 660 nupama nupama
+  postrotate
+    systemctl restart nupama
+  endscript
+}

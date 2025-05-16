@@ -14,7 +14,7 @@ EOF
 	sudo rpm --import /etc/pki/rpm-gpg/$repo.gpg
 fi
 
-if [ -d /etc/dnf/dnf.conf ]
+if [ -f /etc/dnf/dnf.conf ]
 then
 	sudo sh -c "cat >/etc/pki/rpm-gpg/$repo.gpg" <<EOF
 $pubkey
