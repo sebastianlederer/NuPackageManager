@@ -77,44 +77,54 @@
 		{id: "repoid", name: "ID", field: "repoid", cssClass: "mycell" },
 	];
 
-	$(document).ready(function () {
-
-#js_create_grid("columns")
-
-		grid.onSelectedRowsChanged.subscribe(function() { 
-			let something_selected=false;
-			let disable_update=true;
-			let approved=false;
-			let enable_mirror=false;
-	   		row_ids = grid.getSelectedRows();
-			console.log(row_ids);
-			if(row_ids.length > 0) {
-				var o = dataView.getItem(row_ids[0]);
-				something_selected=true;
+	function enable_buttons() {
+		let something_selected=false;
+		let disable_update=true;
+		let approved=false;
+		let enable_mirror=false;
+#if($viaprofile)
+		row_ids = []; for(var i=0; i<grid.getDataLength(); i++) row_ids.push(i);
+		something_selected=false;
+#else
+		row_ids = grid.getSelectedRows();
+		something_selected = row_ids.length > 0;
+#end
+		console.log(row_ids);
+		if(row_ids.length > 0) {
+			disable_update = false;
+			for(var row_idx = 0; row_idx < row_ids.length; row_idx++) {
+				var o = dataView.getItem(row_ids[row_idx]);
 
 				console.log(o);
 
 				// determine if origin package list has been approved
 				if(o.pred_id!=null) {
-					disable_update = (o.pred_appr_reqd==true && o.pred_approved==false)
+					disable_update = disable_update || (o.approvalRequired==true && o.pred_approved==false)
 				}
 				enable_mirror=(o.upstream != null && o.upstream != "") ;
 				console.log(o.pred_id);
 				console.log(disable_update);
 			}
+		}
 #if(!$disablebuttons)
-			$("#button-edit").button("option","disabled", something_selected==false);
-			$("#button-rename").button("option","disabled", something_selected==false);
-			$("#button-delete").button("option","disabled", something_selected==false);
+		$("#button-edit").button("option","disabled", something_selected==false);
+		$("#button-rename").button("option","disabled", something_selected==false);
+		$("#button-delete").button("option","disabled", something_selected==false);
 #end
-			$("#button-view").button("option","disabled", something_selected==false);
+		$("#button-view").button("option","disabled", something_selected==false);
 #if(!$disableapproval)
-			$("#button-approve").button("option","disabled",
-				something_selected==false || approved==true);
+		$("#button-approve").button("option","disabled",
+			something_selected==false || approved==true);
 #end
-			$("#button-update").button("option","disabled", disable_update);
-			$("#button-mirror").button("option","disabled", enable_mirror==false);
-		});
+		$("#button-update").button("option","disabled", disable_update);
+		$("#button-mirror").button("option","disabled", enable_mirror==false);
+	}
+
+	$(document).ready(function () {
+
+#js_create_grid("columns")
+		dataView.onRowsChanged.subscribe(enable_buttons);
+		grid.onSelectedRowsChanged.subscribe(enable_buttons);
 		grid.onDblClick.subscribe(function() { $("#button-view").click(); });
 #js_dialog_form("new" "Create" "ui-icon-plus" $disablenew false)
 #js_dialog_form("edit" "Save" "ui-icon-pencil" true false)

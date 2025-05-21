@@ -39,10 +39,9 @@
 #set($pred_approval_reqd="false")
 #set($pred_approved="false")
 #else
-#set($pred_approval_reqd=$rs.pred.approvalRequired)
 #set($pred_approved=$rs.pred.approved)
 #end
-$!sep{ "id": $rs.id, "name": "$rs.name", "description": "$!rs.description", "pred": "$!rs.pred.name", "origin": "$!rs.origin.name", "schedule": "$!rs.schedule", "lastUpdate": "$!rs.lastUpdate", "owner": "$!rs.owner", "approvalRequired": $rs.approvalRequired, "approved": $rs.approved, "atomic": $rs.atomic, "upd_count": $rs.updateCount, "upd_count_origin": $rs.updateCountOrigin, "upstream": "$!rs.upstream.name", "signingmode": $rs.signingMode, "action": "$!rs.action", "result": "$!rs.result", "pred_id": $pred_id, "indent": $rs.indent, "repoid": "$rs.id", "pred_appr_reqd": $pred_approval_reqd, "pred_approved": $pred_approved }
+$!sep{ "id": $rs.id, "name": "$rs.name", "description": "$!rs.description", "pred": "$!rs.pred.name", "origin": "$!rs.origin.name", "schedule": "$!rs.schedule", "lastUpdate": "$!rs.lastUpdate", "owner": "$!rs.owner", "approvalRequired": $rs.approvalRequired, "approved": $rs.approved, "atomic": $rs.atomic, "upd_count": $rs.updateCount, "upd_count_origin": $rs.updateCountOrigin, "upstream": "$!rs.upstream.name", "signingmode": $rs.signingMode, "action": "$!rs.action", "result": "$!rs.result", "pred_id": $pred_id, "indent": $rs.indent, "repoid": "$rs.id", "pred_approved": $pred_approved }
 #end
 #end
 #if(!$params.key)
