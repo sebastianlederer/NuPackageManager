@@ -54,7 +54,7 @@ def process_record(data, results, filter_sections=None, filter_regex=None):
             fn = data[filename].decode('utf8')
             desc = data[description].decode('utf8')
 
-            if filter_regex is not None and filter_regex.match(pack):
+            if filter_regex is not None and filter_regex.match(pack + "-" + vers):
                 #print("skipping(re blacklist)", pack)
                 return
 
