@@ -210,32 +210,34 @@ def mirror(dbconn, repo):
 
         fetched = []
 
-        if upstream.type == 'apt':
-            suffix = ".deb"
-            print("  components ", upstream.component)
+        try:
+            if upstream.type == 'apt':
+                suffix = ".deb"
+                print("  components ", upstream.component)
 
-            localdir = get_local_dir(repo)
-            components = upstream.component.split(" ")
-            fetched = reposnap.apt.fetch_repo(upstream.url, localdir,
-                upstream.dist, components,
-                [ "all", upstream.arch ],
-                progress_updater = lambda p: progress_updater(dbconn, p) )
+                localdir = get_local_dir(repo)
+                components = upstream.component.split(" ")
+                fetched = reposnap.apt.fetch_repo(upstream.url, localdir,
+                    upstream.dist, components,
+                    [ "all", upstream.arch ],
+                    progress_updater = lambda p: progress_updater(dbconn, p) )
 
-        elif upstream.type == 'rpm':
-            suffix = ".rpm"
-            localdir = get_local_dir(repo)
-            fetched = reposnap.rpm.get_rpm_repo(upstream.url, localdir,
-                lambda p: progress_updater(dbconn, p))
-        else:
-            print("  unknown repo type")
+            elif upstream.type == 'rpm':
+                suffix = ".rpm"
+                localdir = get_local_dir(repo)
+                fetched = reposnap.rpm.get_rpm_repo(upstream.url, localdir,
+                    lambda p: progress_updater(dbconn, p))
+            else:
+                print("  unknown repo type")
 
-        update_repo_packages(dbconn, repo, fetched)
+            update_repo_packages(dbconn, repo, fetched)
+            cleanup_packages(localdir, fetched, suffix)
+            result = None
+        except Exception as ex:
+            result = str(ex)[:100]
 
-        result = None
-
-        clear_taskstatus(dbconn, repo)
         update_repo_status(dbconn, repo.id, result, datetime.datetime.now())
-        cleanup_packages(localdir, fetched, suffix)
+        clear_taskstatus(dbconn, repo)
 
 
 def cleanup_packages(localdir, fetched, suffix):

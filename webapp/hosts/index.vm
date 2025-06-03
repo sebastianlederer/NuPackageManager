@@ -37,7 +37,7 @@
 	$(document).ready(function () {
 
 #js_create_grid("columns", true)
-
+		grid.registerPlugin(new Slick.AutoTooltips());
 #if($hosts_editable)
 		grid.onSelectedRowsChanged.subscribe(function() {
 			const selCount = grid.getSelectedRows().length;

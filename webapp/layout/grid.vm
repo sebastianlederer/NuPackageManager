@@ -18,6 +18,7 @@
 	<SCRIPT type="text/javascript" src="$root/js/slick.dataview.js"></SCRIPT>
 	<SCRIPT type="text/javascript" src="$root/js/slick.formatters.js"></SCRIPT>
 	<SCRIPT type="text/javascript" src="$root/js/slick.rowselectionmodel.js"></SCRIPT>
+	<SCRIPT type="text/javascript" src="$root/js/slick.autotooltips.js"></SCRIPT>
 
 	<SCRIPT type="text/javascript" src="$root/js/validators.js"></SCRIPT>
 </HEAD>

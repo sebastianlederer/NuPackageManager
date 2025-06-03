@@ -49,7 +49,7 @@
 
 	function DiffCountFormatter(row, cell, value, columnDef, dataContext) {
 		if (value == null || value === "0" || value==0) {
-			return "&nbsp;-&nbsp";
+			return "&nbsp;-&nbsp;";
     		} else {
       			return "<span style='color:white;background:#e05050;border-radius:8px'>&nbsp;" + value + "&nbsp;</span>";
 		}
@@ -63,6 +63,15 @@
 		return (value) ?  '<span class="ui-icon ui-icon-check" style="display:inline-block"></span>' : "";
 	}
 
+	function StatusFormatter(row,cell,value,columnDef,dataContext) {
+		console.log(value);
+		if(value === null || value === "") {
+			return "&nbsp;-&nbsp;";
+		} else {
+      			return "&#x26a0;&#xfe0f;&nbsp;" + value;
+		}
+	}
+
 #js_search()
 
 	var grid;
@@ -74,6 +83,7 @@
 		{id: "upd_count_origin", name: "Updates (Ursprung)", field: "upd_count_origin", cssClass: "mycell", formatter: DiffCountFormatter}, 
 		{id: "schedule", name: "Zeitplan", field: "schedule", cssClass: "mycell" },
 		{id: "lastUpdate", name: "Aktualisiert", field: "lastUpdate", cssClass: "mycell" },
+		{id: "result", name: "Status", field: "result", cssClass: "mycell", formatter: StatusFormatter },
 		{id: "repoid", name: "ID", field: "repoid", cssClass: "mycell" },
 	];
 
@@ -123,6 +133,7 @@
 	$(document).ready(function () {
 
 #js_create_grid("columns")
+		grid.registerPlugin(new Slick.AutoTooltips());
 		dataView.onRowsChanged.subscribe(enable_buttons);
 		grid.onSelectedRowsChanged.subscribe(enable_buttons);
 		grid.onDblClick.subscribe(function() { $("#button-view").click(); });

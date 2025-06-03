@@ -92,7 +92,7 @@ def get_modified(url, oldfilepath):
 
     if resp.status_code >=400:
         print("error response text:",resp.text)
-        raise http.client.HTTPException("fetching {}: status {}".format(url, resp.status_code))
+        raise http.client.HTTPException("status {} fetching {}".format(resp.status_code, url))
 
     if resp.status_code != 304:
         print("HTTP status:", resp.status_code)
