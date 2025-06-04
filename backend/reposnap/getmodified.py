@@ -54,7 +54,7 @@ def http_request(method, url, headers):
     if method == 'GET':
         resp = None
         try:
-            resp = session.get(url, headers=headers, timeout=180)
+            resp = session.get(url, headers=headers, timeout=180, stream=True)
             if resp.status_code == 503:
                 timeout = 300
                 raise Exception("HTTP status 503 - Service Unavailable")
