@@ -285,16 +285,29 @@ $response.setStatus(409)
 <span id="task_progress" class="greynumber-big"></span>
 <span id="task_status"></span>
 <script>
-function updateTaskStatus() {
+function forceRefresh() {
+	setTimeout(refreshHandler, 7000);
+}
+
+function refreshHandler() {
+	updateTaskStatus(true);
+}
+
+function updateTaskStatus(force_refresh) {
+	if(force_refresh === undefined)
+		force_refresh = false;
+
 	$.getJSON("$root/taskstatus.vm", function(data) {
 		let p = data.progress;
 		const oldmsg = $('#task_progress').html();
 		if(p != '') p = '&nbsp;' + p + '&nbsp;';
 		$('#task_progress').html(p);
 		$('#task_status').html(data.task + ' ' + data.message);
-		if(oldmsg !== '' && data.message === '') {
+
+		if(force_refresh ||
+			(oldmsg !== '' && data.message === '')) {
 #if($jsonkey)
-#			#js_load_data_key($module $id $jsonkey)
+			#js_load_data_key($module $id $jsonkey)
 #else
 			#js_load_data($module $id)
 #end
@@ -406,10 +419,11 @@ function form_${name}_submit() {
 	$.post("$root/$module/${name}-action.vm", values)
 	.done(function() {
 #if($extra_key)
-		#js_load_data_key($module, $id, $extra_key)
+#		#js_load_data_key($module, $id, $extra_key)
 #else
-		#js_load_data($module, $id)
+#		#js_load_data($module, $id)
 #end
+		forceRefresh();
 	})
 	.fail(function(response) {
 		alert("$module $name: " + response.responseText);

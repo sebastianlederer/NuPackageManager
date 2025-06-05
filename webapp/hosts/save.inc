@@ -74,7 +74,7 @@ function form_${form_action}_submit() {
 			"profileName":	$("#dialog-form-$form_action select#profileName").val()
 		})
 	.done(function() {
-		#js_load_data("$module", "name")
+		forceRefresh();
 	})
 	.fail(function() {
 		alert("POST error");

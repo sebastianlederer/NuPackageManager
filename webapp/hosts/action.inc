@@ -150,7 +150,8 @@ function form_${form_action}_submit() {
 			"action_args": args,
 		})
 	.done(function() {
-		#js_load_data("$module", "name")
+		updateTaskStatus(true);
+		forceRefresh();
 	})
 	.fail(function() {
 		alert("POST error");
