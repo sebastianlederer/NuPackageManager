@@ -140,34 +140,35 @@ def get_old_versions_dict(packages_gz, filter_sections, filter_regex):
 def fetch_by_release_file(components, url, releasepath, localdir, archs):
     release_file = localdir + "/" + releasepath + "Release"
     byhash = False
+    byhash_files = []
     with open(release_file) as f:
-        in_md5sum_section = False
+        in_checksum_section = False
+        section = None
         for line in f.readlines():
-            if not in_md5sum_section:
-                if line == "SHA256:\n" or line == "MD5Sum:\n":
-                    in_md5sum_section = True
+            if not in_checksum_section:
+                if line in [ "SHA256:\n", "MD5Sum:\n", "SHA1\n" ]:
+                    in_checksum_section = True
+                    section = line[:len(line)-2]
                 elif line == "Acquire-By-Hash: yes\n":
                     byhash = True
             else:
                 if line[0] == " ":
-                    md5sum, fsize, fname = line.split()
+                    chksum, fsize, fname = line.split()
                     print(" ",fname)
                     try:
                         fetch.fetch(url, releasepath + fname, localdir)
                     except http.client.HTTPException:
                         pass
+                    by_hash_name = os.path.join(os.path.dirname(releasepath + fname), \
+                                "by-hash", section, chksum)
+                    byhash_files.append(by_hash_name)
                 else:
                     break
 
     if byhash:
-        print("getting by-hash directories:")
-        for comp in  components:
-            distpath = releasepath + comp
-            for arch in archs:
-                subpath = distpath + '/binary-' + arch
-                byhashdir = subpath + '/by-hash'
-                print(" ", byhashdir)
-                fetch.fetchdir(url, byhashdir, localdir, True)
+        print("getting by-hash files:")
+        for f in byhash_files:
+            fetch.fetch(url, f, localdir)
 
 
 def find_packages_file(localdir, subpath):
