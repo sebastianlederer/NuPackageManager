@@ -154,21 +154,44 @@ def fetch_by_release_file(components, url, releasepath, localdir, archs):
             else:
                 if line[0] == " ":
                     chksum, fsize, fname = line.split()
-                    print(" ",fname)
+                    print("fetch",fname)
+                    skip_this = False
+                    file_arch_path = os.path.basename(os.path.dirname(fname))
+                    if file_arch_path.startswith("binary-"):
+                        skip_this = True
+                        for arch in archs:
+                            wanted_arch_path = "binary-" + arch
+                            if file_arch_path == wanted_arch_path:
+                                skip_this = False
+                                break
+                    if skip_this:
+                        print("  skipping", file_arch_path, "file")
+                        continue
+
                     try:
                         fetch.fetch(url, releasepath + fname, localdir)
-                    except http.client.HTTPException:
+                    except http.client.HTTPException as ex:
+                        print("  could not fetch", fname, ex)
                         pass
-                    by_hash_name = os.path.join(os.path.dirname(releasepath + fname), \
-                                "by-hash", section, chksum)
-                    byhash_files.append(by_hash_name)
+
+                    # check if we need to add this file to the by-hash directory
+                    if os.path.basename(fname) in \
+                            [ "Release", "Packages", "Packages.gz", "Packages.xz" ]:
+                        by_hash_name = os.path.join(os.path.dirname(releasepath + fname), \
+                                    "by-hash", section, chksum)
+                        print(" +#",fname,"->",by_hash_name)
+                        byhash_files.append(by_hash_name)
                 else:
                     break
 
     if byhash:
         print("getting by-hash files:")
         for f in byhash_files:
-            fetch.fetch(url, f, localdir)
+            try:
+                fetch.fetch(url, f, localdir)
+            except http.client.HTTPException:
+                print("  warning: could not fetch",f)
+                pass
 
 
 def find_packages_file(localdir, subpath):

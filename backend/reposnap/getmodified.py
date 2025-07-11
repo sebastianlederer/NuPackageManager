@@ -91,7 +91,8 @@ def get_modified(url, oldfilepath):
     m_stamp = None
 
     if resp.status_code >=400:
-        print("error response text:",resp.text)
+        if resp.status_code != 404:
+            print("error response text:",resp.text)
         raise http.client.HTTPException("status {} fetching {}".format(resp.status_code, url))
 
     if resp.status_code != 304:
@@ -109,7 +110,7 @@ def get_modified(url, oldfilepath):
 
         try:
             with open(oldfilepath,"wb") as f:
-                for chunk in resp.iter_content(chunk_size=8192):
+                for chunk in resp.iter_content(chunk_size=65536):
                     f.write(chunk)
         except Exception as ex:
             traceback.print_exc()
