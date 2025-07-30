@@ -1,0 +1,99 @@
+#set($layout="grid.vm")
+#set($module="pkgreport.vm")
+#if($params.key)
+#set($title="Installationsreport für Paket $params.key")
+#else
+#set($title="Installationsreport")
+#end
+<script type="text/javascript">
+        $(document).ready(function () {
+#js_create_layout()
+	});
+</script>
+<style>
+.tbl {
+    overflow: auto;
+    width: 100%;
+}
+
+.tbl table {
+    border: 1px solid black;
+    width: 95%;
+    height: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    text-align: left;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.tbl caption {
+    caption-side: top;
+    text-align: left;
+    font-size: 120%;
+    margin-bottom: 0.5em;
+}
+
+.tbl th {
+    border: 1px solid gray;
+    background-color: lightgray;
+    color: black;
+    padding: 0.5em;
+}
+
+.tbl td {
+    border: 1px solid lightgray;
+    color: black;
+    padding: 0.5em;
+}
+
+.tbl tr:nth-child(even) { background-color: #F2F2F2; }
+.tbl tr:nth-child(odd) { background-color: white; }
+
+</style>
+<DIV class="ui-layout-north">#parse("menu.vm")<br></DIV>
+<DIV class="ui-layout-center">
+#if($params.invert && $params.version)
+#set($invertenabled="checked")
+#set($invert=true)
+#else
+#set($invertenabled="")
+#set($invert=false)
+#end
+<br>
+<form method="GET" action="pkgreport.vm">
+<label for="key">Paketname</label><input type="text" name="key" id="key" value="$!params.key">
+<div style="float:left;margin-left:2em;margin-top:0.2em"><input type="submit" value="Suchen"></div><br>
+<label for="version">Paketversion</label><input type="text" name="version" id="version" value="$!params.version"><br>
+<label for="invert">Umkehren</label><input type="checkbox" name="invert" $invertenabled><br>
+</form>
+#if($params.version)
+#set($res = $instpackages.getInstalledOn($params.key, $params.version, $invert))
+#else
+#set($res = $instpackages.getInstalledOn($params.key, "", $invert))
+#end
+<hr>
+<div class="tbl">
+<table>
+<caption>$title</caption>
+<thead>
+<tr>
+<th>Host</th><th>Paketversion</th>
+</tr>
+</thead>
+<tbody>
+#foreach($r in $res)
+<tr>
+<td>$r[0]</td><td>$r[1]</td>
+</tr>
+#end
+</tbody>
+</table>
+<div>
+</DIV>
+<DIV class="ui-layout-south">
+<div class="buttons">
+<span>&nbsp;</span>
+</div>
+</DIV>

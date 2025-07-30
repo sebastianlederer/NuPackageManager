@@ -6,3 +6,5 @@ lib
 *.zip
 build.properties
 **/__pycache__
+.classpath
+.project
