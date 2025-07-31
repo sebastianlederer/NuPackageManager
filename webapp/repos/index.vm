@@ -176,7 +176,10 @@
 	</SCRIPT>
 <DIV class="ui-layout-center">
 </DIV>
-<DIV class="ui-layout-north">#parse("menu.vm")#taskstatus($module, "id") #searchbox()</DIV>
+#if($viaprofile)
+#set($profilekey="profile=$params.profile")
+#end
+<DIV class="ui-layout-north">#parse("menu.vm")#taskstatus($module, "id", $!profilekey) #searchbox()</DIV>
 <DIV class="ui-layout-south">
 <div class="buttons">
 <button id="button-new">Neu</button>

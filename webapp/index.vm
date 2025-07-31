@@ -34,6 +34,9 @@
 <script type="text/javascript">
         $(document).ready(function () {
 #js_create_layout()
+	$("#button-pkgreport").button().click(function() {
+			window.location = "pkgreport.vm";
+		});
 	});
 </script>
 <DIV class="ui-layout-north">#parse("menu.vm")<br></DIV>
@@ -59,6 +62,7 @@ $s.message
 </DIV>
 <DIV class="ui-layout-south">
 <div class="buttons">
+<button id="button-pkgreport">Paket-Report</button>
 <span>&nbsp;</span>
 </div>
 </DIV>
