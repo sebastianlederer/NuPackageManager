@@ -64,5 +64,6 @@ $s.message
 <div class="buttons">
 <button id="button-pkgreport">Paket-Report</button>
 <span>&nbsp;</span>
+<small style="float:right">Build #parse("buildnumber.vm")</small>
 </div>
 </DIV>
