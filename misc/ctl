@@ -40,5 +40,12 @@ then
 	exit 0
 fi
 
-exec setsid python3 -u nupamabackend.py watch >>/var/log/$prg.log </dev/null 2>&1 &
+if [ -x python ]
+then
+	PYTHON=./python
+else
+	PYTHON=python3
+fi
+
+exec setsid $PYTHON -u nupamabackend.py watch >>/var/log/$prg.log </dev/null 2>&1 &
 echo $! >$pidpath

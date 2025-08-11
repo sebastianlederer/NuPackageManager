@@ -1,3 +1,9 @@
 #!/bin/sh
 cd $(dirname $0)
-exec python3 nupamabackend.py schedule $@
+if [ -x python ]
+then
+	PYTHON=./python
+else
+	PYTHON=python3
+fi
+exec $PYTHON nupamabackend.py schedule $@
