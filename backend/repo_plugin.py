@@ -27,13 +27,16 @@ def get_upstream(dbconn, repo):
 
 
 def repocopy(dbconn, repo):
-    dst_dir = get_local_dir(repo)
-    src_dir = get_local_prefix() + str(repo.pred)
-    print("repocopy {} -> {}".format(src_dir,dst_dir))
-    reposnap.takesnap.copydir(src_dir, dst_dir)
-    copy_repo_packages(dbconn, repo)
-    result = ''
-    update_repo_status(dbconn, repo.id, result, datetime.datetime.now())
+    if repo.pred is None:
+        clear_repo_action(dbconn, repo.id)
+    else:
+        dst_dir = get_local_dir(repo)
+        src_dir = get_local_prefix() + str(repo.pred)
+        print("repocopy {} -> {}".format(src_dir,dst_dir))
+        reposnap.takesnap.copydir(src_dir, dst_dir)
+        copy_repo_packages(dbconn, repo)
+        result = ''
+        update_repo_status(dbconn, repo.id, result, datetime.datetime.now())
 
 
 def repodelete(dbconn, repo):
@@ -272,6 +275,15 @@ def update_repo_status(dbconn, id, result, timestamp):
             UPDATE repository SET (approved,action,result,last_update) =
             (false, NULL, %s, %s) WHERE id=%s
             """, (result, timestamp, id))
+        dbconn.commit()
+
+
+def clear_repo_action(dbconn, id):
+    with dbconn.cursor() as cursor:
+        cursor.execute("""
+            UPDATE repository SET (action,result) =
+            (NULL, '') WHERE id=%s
+            """, (id))
         dbconn.commit()
 
 
