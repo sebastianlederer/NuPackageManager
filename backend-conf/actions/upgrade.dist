@@ -5,7 +5,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y -o pkg::Options::="--force-co
 fi
 if [ -x /usr/bin/zypper ]
 then
-	sudo zypper up --no-recommends -y
+	sudo -i zypper up --no-recommends -y
 fi
 if [ -f /etc/dnf/dnf.conf ]
 then
