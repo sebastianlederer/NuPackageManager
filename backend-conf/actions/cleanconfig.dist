@@ -7,6 +7,24 @@ then
 	do
 		sudo mv $$d $$d.orig
 	done
+
+	for repo_file in nupama.*
+	do
+		found=""
+		for configured_repo in $$repo_list
+		do
+			if [ "nupama.$$configured_repo" = "$$repo_file" ]
+			then
+				found=true
+				break
+			fi
+		done
+		if [ -z "$$found" ]
+		then
+			sudo rm "$$repo_file"
+		fi
+	done
+
 	if [ -s /etc/apt/sources.list ]
 	then
 		sudo truncate --size 0 /etc/apt/sources.list
@@ -16,6 +34,24 @@ fi
 if [ -d /etc/zypp ]
 then
 	cd /etc/zypp/repos.d
+
+	for repo_file in nupama.*.repo
+	do
+		found=""
+		for configured_repo in $$repo_list
+		do
+			if [ "nupama.$$configured_repo.repo" = "$$repo_file" ]
+			then
+				found=true
+				break
+			fi
+		done
+		if [ -z "$$found" ]
+		then
+			sudo rm "$$repo_file"
+		fi
+	done
+
 	for r in $$(ls *.repo)
 	do
 		if [ ! -f nupama.$$r.repo ]
@@ -29,6 +65,24 @@ fi
 if [ -f /etc/dnf/dnf.conf ]
 then
 	cd /etc/yum.repos.d
+
+	for repo_file in nupama.*.repo
+	do
+		found=""
+		for configured_repo in $$repo_list
+		do
+			if [ "nupama.$$configured_repo.repo" = "$$repo_file" ]
+			then
+				found=true
+				break
+			fi
+		done
+		if [ -z "$$found" ]
+		then
+			sudo rm "$$repo_file"
+		fi
+	done
+
 	for r in $$(dnf repolist --enabled | awk '{ print $$1 }')
 	do
 		if [ "$$r" = repo ]
