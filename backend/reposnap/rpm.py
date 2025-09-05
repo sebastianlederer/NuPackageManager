@@ -11,6 +11,10 @@ import reposnap.fetch
 import reposnap.getmodified as getmodified
 import reposnap.filter_href
 import reposnap.rpm
+try:
+    import pyzstd
+except ImportError:
+    pyzstd = None
 
 blacklist='../conf/rpm.blacklist'
 blacklist_re='../conf/rpm.blacklist.re'
@@ -126,6 +130,12 @@ def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
         open_func = lzma.open
     elif path.endswith(".bz2"):
         open_func = bz2.open
+    elif path.endswith(".zst"):
+        if pyzstd is not None:
+            open_func = pyzstd.open
+        else:
+            printf("zst compression not supported")
+            return results
     else:
         open_func = open
 
