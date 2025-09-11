@@ -89,9 +89,9 @@
 
 	function enable_buttons() {
 		let something_selected=false;
-		let disable_update=true;
+		let enable_update=true;
 		let approved=false;
-		let enable_mirror=false;
+		let enable_mirror=true;
 #if($viaprofile)
 		row_ids = []; for(var i=0; i<grid.getDataLength(); i++) row_ids.push(i);
 		something_selected=false;
@@ -99,23 +99,27 @@
 		row_ids = grid.getSelectedRows();
 		something_selected = row_ids.length > 0;
 #end
+		disable_update = (row_ids.length != 1) || (dataView.getItem(row_ids[0]).pred_id == null);
+
 		console.log(row_ids);
-		if(row_ids.length > 0) {
-			disable_update = false;
+		if(something_selected) {
 			for(var row_idx = 0; row_idx < row_ids.length; row_idx++) {
 				var o = dataView.getItem(row_ids[row_idx]);
 
 				console.log(o);
 
-				// determine if origin package list has been approved
-				if(o.pred_id!=null) {
-					disable_update = disable_update || (o.approvalRequired==true && o.pred_approved==false)
-				}
-				enable_mirror=(o.upstream != null && o.upstream != "") ;
+				// determine if predecessor repository exists and has been approved
+				enable_update = enable_update && o.pred_id != null && (o.approvalRequired==false || o.pred_approved==true)
+				enable_mirror = enable_mirror && (o.upstream != null && o.upstream != "") ;
 				console.log(o.pred_id);
 				console.log(disable_update);
 			}
 		}
+		else {
+			enable_update = false;
+			enable_mirror = false;
+		}
+
 #if(!$disablebuttons)
 		$("#button-edit").button("option","disabled", something_selected==false);
 		$("#button-rename").button("option","disabled", something_selected==false);
@@ -126,7 +130,7 @@
 		$("#button-approve").button("option","disabled",
 			something_selected==false || approved==true);
 #end
-		$("#button-update").button("option","disabled", disable_update);
+		$("#button-update").button("option","disabled", enable_update==false);
 		$("#button-mirror").button("option","disabled", enable_mirror==false);
 	}
 

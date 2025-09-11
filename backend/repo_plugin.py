@@ -18,6 +18,9 @@ def get_local_dir(repo ):
     return get_local_prefix() + str(repo.id)
 
 
+def get_pred_dir(repo):
+    return get_local_prefix() + str(repo.pred)
+
 def get_upstream(dbconn, repo):
     upstream = None
     with dbconn.cursor() as cursor:
@@ -27,11 +30,11 @@ def get_upstream(dbconn, repo):
 
 
 def repocopy(dbconn, repo):
-    if repo.pred is None:
+    if repo.pred is None or not os.path.isdir(get_pred_dir(repo)):
         clear_repo_action(dbconn, repo.id)
     else:
         dst_dir = get_local_dir(repo)
-        src_dir = get_local_prefix() + str(repo.pred)
+        src_dir = get_pred_dir(repo)
         print("repocopy {} -> {}".format(src_dir,dst_dir))
         reposnap.takesnap.copydir(src_dir, dst_dir)
         copy_repo_packages(dbconn, repo)
@@ -283,7 +286,7 @@ def clear_repo_action(dbconn, id):
         cursor.execute("""
             UPDATE repository SET (action,result) =
             (NULL, '') WHERE id=%s
-            """, (id))
+            """, (id,))
         dbconn.commit()
 
 
