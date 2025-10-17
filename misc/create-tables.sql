@@ -133,6 +133,14 @@ CREATE TABLE profile_repo (
 	PRIMARY KEY (profile, repo)
 );
 
+CREATE TABLE role (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(80) NOT NULL,
+	description VARCHAR(130),
+	profile INTEGER REFERENCES profile(d),
+	host INTEGER REFERENCES host(id)
+);
+
 CREATE TABLE notification (
 	id INTEGER NOT NULL PRIMARY KEY,
 	serial SERIAL,

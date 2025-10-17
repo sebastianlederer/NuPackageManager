@@ -23,6 +23,20 @@
 		#dropdown( "profileName", $profile_names, "") 
 		<br>
 		#inputbox("options","Optionen",true)
+		<br>
+		<fieldset class="checkboxline" style="layout:grid-row">
+			<legend>Rollen</legend>
+			<label for="role-1">SLES</label>
+			<input type="checkbox" name="role-1" id="role-1">
+			<label for="role-2">backup_veeam</label>
+			<input type="checkbox" name="role-2" id="role-2">
+			<label for="role-3">root_CA_elw</label>
+			<input type="checkbox" name="role-3" id="role-3">
+			<label for="role-4">docker_ce</label>
+			<input type="checkbox" name="role-4" id="role-4">
+			<label for="role-5">monitoring</label>
+			<input type="checkbox" name="role-5" id="role-5">
+		</fieldset>
 	</fieldset>
 	</form>
 </div>
@@ -39,6 +53,7 @@ function form_${form_action}_load(o) {
 }
 #else
 function form_${form_action}_load(o) {
+				$("input").checkboxradio();
 				$("fieldset[name=$form_action] #key").val(o.id);
 				$("fieldset[name=$form_action] #name").val(o.name);
 				$("fieldset[name=$form_action] #description").val(o.description);
