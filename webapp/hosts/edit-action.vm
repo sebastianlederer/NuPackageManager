@@ -12,6 +12,7 @@
 #set ($obj.profile=$null)
 #end
 #if($hosts_editable)
+$roles.setRolesForHost($obj, $params.getValues("roles[]"))
 $hosts.save($obj)
 $obj saved
 $params.description

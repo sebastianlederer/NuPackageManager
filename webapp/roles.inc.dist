@@ -1,0 +1,19 @@
+#set($rolenames = [
+"etckeeper",
+"firewalld",
+"postfix",
+"sshd",
+"users",
+])
+
+#set($colorwheel = [
+"deepskyblue",
+"orangered",
+"royalblue",
+"darkorange",
+"blueviolet",
+"limegreen",
+"coral",
+"lightseagreen",
+"maroon"
+])

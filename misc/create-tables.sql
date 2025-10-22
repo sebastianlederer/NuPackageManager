@@ -137,7 +137,7 @@ CREATE TABLE role (
 	id SERIAL PRIMARY KEY,
 	name VARCHAR(80) NOT NULL,
 	description VARCHAR(130),
-	profile INTEGER REFERENCES profile(d),
+	profile INTEGER REFERENCES profile(id),
 	host INTEGER REFERENCES host(id)
 );
 

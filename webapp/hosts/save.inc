@@ -7,6 +7,40 @@
 #else
 #set($isNewAction=false)
 #end
+#parse("roles.inc")
+<style>
+
+#set($colorindex=1)
+#foreach($c in $colorwheel)
+input[type="checkbox"] + label.cell$colorindex { color: black; background: white; border-color: $c; }
+input[type="checkbox"]:checked + label.cell$colorindex { color: white; border-color: $c; background-color: $c; }
+#set($colorindex=$colorindex+1)
+#end
+
+.checkboxfield {
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+	grid-gap: 0.5rem;
+}
+
+.checkboxfield input[type="checkbox"] {
+	display: none;
+}
+	
+.checkboxfield input[type="checkbox"] + label  {
+	transition: all 300ms ease;
+	cursor: pointer;
+	border-radius: 3px;
+	border-style: solid;
+	border-width: 1px;
+	padding: 0.5rem;
+	display: inline-block;
+	user-select: none;
+	text-align: center;
+	margin: 0;
+}
+
+</style>
 <div id="dialog-form-${form_action}" title="${form_title}">
 	<p class="validateTips">All form fields are required.</p>
 	<form id="form-${form_action}" method="post" accept-charset="utf-8" action="$root/$module/${form_action}-action.vm">
@@ -24,18 +58,19 @@
 		<br>
 		#inputbox("options","Optionen",true)
 		<br>
-		<fieldset class="checkboxline" style="layout:grid-row">
+		<fieldset>
 			<legend>Rollen</legend>
-			<label for="role-1">SLES</label>
-			<input type="checkbox" name="role-1" id="role-1">
-			<label for="role-2">backup_veeam</label>
-			<input type="checkbox" name="role-2" id="role-2">
-			<label for="role-3">root_CA_elw</label>
-			<input type="checkbox" name="role-3" id="role-3">
-			<label for="role-4">docker_ce</label>
-			<input type="checkbox" name="role-4" id="role-4">
-			<label for="role-5">monitoring</label>
-			<input type="checkbox" name="role-5" id="role-5">
+			<div id="${form_action}_checkboxes" class="checkboxfield">
+#set($colorindex = 1)
+#foreach($role in $rolenames)
+				<input type="checkbox" name="$role" value="$role" id="${form_action}_r_$role"/>
+				<label class="cell$colorindex" for="${form_action}_r_$role">$role</label>
+#set($colorindex = $colorindex + 1)
+#if($colorindex > $colorwheel.size())
+#set($colorindex = 1)
+#end
+#end
+			</div>
 		</fieldset>
 	</fieldset>
 	</form>
@@ -53,7 +88,18 @@ function form_${form_action}_load(o) {
 }
 #else
 function form_${form_action}_load(o) {
-				$("input").checkboxradio();
+				$.post("$root/$module/roles.json.vm?key="+o.id)
+				.done(function(result) {
+					var checkboxes = $("#${form_action}_checkboxes input");
+					checkboxes.each(function() {
+							const name = $(this).val();
+							$(this).prop("checked", result.includes(name));
+					});
+				})
+				.fail(function() {
+					alert("POST error");
+				});
+
 				$("fieldset[name=$form_action] #key").val(o.id);
 				$("fieldset[name=$form_action] #name").val(o.name);
 				$("fieldset[name=$form_action] #description").val(o.description);
@@ -78,6 +124,15 @@ function form_${form_action}_validate() {
 }
 
 function form_${form_action}_submit() {
+	var checkboxes = $("#${form_action}_checkboxes input");
+	var roles = [];
+	checkboxes.each(function() {
+			if($(this).prop("checked")) {
+				roles.push($(this).val());
+			}
+		}
+	);
+
 	$.post("$root/$module/${form_action}-action.vm",
 		{
 			"key":		$("fieldset[name=$form_action] #key").val(),
@@ -86,7 +141,8 @@ function form_${form_action}_submit() {
 			"ipAddress":	$("fieldset[name=$form_action] #ipAddress").val(),
 			"macAddress":	$("fieldset[name=$form_action] #macAddress").val(),
 			"options":	$("fieldset[name=$form_action] #option").val(),
-			"profileName":	$("#dialog-form-$form_action select#profileName").val()
+			"profileName":	$("#dialog-form-$form_action select#profileName").val(),
+			"roles":	roles
 		})
 	.done(function() {
 		forceRefresh();

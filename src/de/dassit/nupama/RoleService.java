@@ -1,13 +1,14 @@
 package de.dassit.nupama;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
@@ -71,6 +72,28 @@ public class RoleService {
 		}
 
 		return result;
+	}
+
+	public List<Role> getByHost(Host h) {
+		return getByHostId(h.getId());
+	}
+
+	public void setRolesForHost(Host h, String[] rolenames) throws SQLException {
+		TransactionManager.callInTransaction(DbConnection.getConnectionSource(),
+				new Callable<Void>() {
+			public Void call() throws Exception {
+				DeleteBuilder<Role,Object> b = dao.deleteBuilder();
+				b.where().eq(Role.HOST_FIELD_NAME, h.getId());
+				b.delete();
+				for(String n:rolenames) {
+					Role r = makeNew();
+					r.setHost(h);
+					r.setName(n);
+					save(r);
+				}
+				return null;
+			}
+		});
 	}
 
 	public void save(Role r) throws SQLException {

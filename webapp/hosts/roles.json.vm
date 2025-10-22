@@ -1,0 +1,14 @@
+#set($layout="json.vm")
+#set ($res=${response.setContentType("application/json")})
+
+#set($Integer=0)
+#set($h=$hosts.getById($Integer.parseInt($params.key)))
+
+#set($rs=$roles.getByHost($h))
+#set($sep="")
+[
+#foreach($r in $sorter.sort($rs,"name"))
+$sep"$r.name"
+#set($sep=",")
+#end
+]
