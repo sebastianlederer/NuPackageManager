@@ -18,6 +18,9 @@
 				<input type="radio" name="action" id="actionReport" value="report">
 				<label for="actionReport">Report</label>
 				<br>
+				<input type="radio" name="action" id="actionRoles" value="roles">
+				<label for="actionRoles">Rollen anwenden</label>
+				<br>
 				<input type="radio" name="action" id="actionConfigure" value="config">
 				<label for="actionConfigure">Konfiguration</label>
 				<br>
@@ -125,6 +128,7 @@ function form_${form_action}_submit() {
 	var args = "";
 
 	if($("#actionReport:checked").val() !== undefined) action = "report";
+	if($("#actionRoles:checked").val() !== undefined) action = "roles";
 	if($("#actionConfigure:checked").val() !== undefined) action = "config";
 	if($("#actionUpdate:checked").val() !== undefined) action = "update";
 	if($("#actionReboot:checked").val() !== undefined) action = "reboot";

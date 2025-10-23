@@ -1,0 +1,2 @@
+cd /build/nupama/ansible
+ansible-playbook -i hosts nupama.yaml -e "nupama_target=$hostname"

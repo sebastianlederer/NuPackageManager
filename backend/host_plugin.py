@@ -1,6 +1,7 @@
 import subprocess
 import time
 import string
+import json
 import psycopg2
 import psycopg2.extras
 from multiprocessing import Pool
@@ -164,6 +165,20 @@ def update_host_pkgs(dbconn, host, pkgs):
         dbconn.commit()
 
 
+def get_combined_roles(dbconn, host):
+    with dbconn.cursor() as cursor:
+        cursor.execute("""
+            SELECT DISTINCT name FROM role
+                WHERE host=%s
+                OR profile=(SELECT profile FROM host WHERE id=%s)
+            ORDER BY name ASC
+        """, (host.id, host.id))
+
+        roles = cursor.fetchall()
+    dbconn.commit()
+    return roles
+
+
 def command(cmd):
     print("executing command ",cmd)
     subprocess.check_call(cmd, shell=True)
@@ -181,6 +196,11 @@ def command_output(cmd, script):
 def remote_command(host, script):
     cmd = '/usr/bin/ssh -o ConnectTimeout={} -o PasswordAuthentication=no -i {} -T {} {}@{}'.format(
                 config.ssh_timeout, config.ssh_key, config.ssh_options, config.ssh_user, host.name)
+    return command_output(cmd, script)
+
+
+def local_command(host, script):
+    cmd = '/bin/sh'
     return command_output(cmd, script)
 
 
@@ -260,6 +280,27 @@ def perform_custom(dbconn, host):
 
     if exitcode == 0:
         return "OK"
+    else:
+        return "- " + output.splitlines()[-1][:78]
+
+
+def perform_roles(dbconn, host):
+    script = """
+    """
+
+    roles = get_combined_roles(dbconn, host)
+    roles_json = json.dumps(roles)
+    script_template = string.Template(config.get_scriptlet("roles"))
+    script = script_template.substitute({ "hostname": host.name, "roles":roles_json })
+
+    print(script)
+
+    exitcode, output = local_command(host, script)
+
+    print(output)
+
+    if exitcode == 0:
+        return "OK " + output.splitlines()[-1][:78]
     else:
         return "- " + output.splitlines()[-1][:78]
 
@@ -407,6 +448,8 @@ def perform_action(dbconn, host):
             return result
     if 'M' in host.action:
         result = perform_custom(dbconn, host)
+    if 'O' in host.action:
+        result = perform_roles(dbconn, host)
 
     return result
 
@@ -426,6 +469,8 @@ def describe_action(dbconn, host):
         result += ' reboot'
     if 'M' in host.action:
         result += ' custom cmd'
+    if 'O' in host.action:
+        result += ' apply roles'
 
     return result
 

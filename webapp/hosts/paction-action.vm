@@ -19,6 +19,9 @@
 #if($params.action == "custom")
 #set($action="M")
 #end
+#if($params.action == "roles")
+#set($action="O")
+#end
 #if($hosts_editable)
 #foreach($obj in $hostlist)
 #set($obj.action=$action)

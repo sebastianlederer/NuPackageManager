@@ -7,6 +7,8 @@
 #else
 #set ($disable_flag=true)
 #end
+#parse("roles.inc")
+#parse("colorwheel.inc")
 	<SCRIPT type="text/javascript">
 
 #js_search("name")

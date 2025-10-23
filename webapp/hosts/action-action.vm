@@ -19,6 +19,9 @@
 #if($params.action == "custom")
 #set($action="M")
 #end
+#if($params.action == "roles")
+#set($action="O")
+#end
 #set ($obj.action=$action)
 #if($params.action_args)
 #set($obj.actionArgs = $params.action_args)

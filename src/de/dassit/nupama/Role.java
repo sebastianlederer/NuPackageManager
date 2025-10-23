@@ -10,6 +10,7 @@ public class Role implements Cloneable, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	public static final String HOST_FIELD_NAME = "host";
+	public static final String PROFILE_FIELD_NAME = "profile";
 
 	@DatabaseField(generatedId = true)
 	private Integer id;

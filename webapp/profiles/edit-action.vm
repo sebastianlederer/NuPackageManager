@@ -4,5 +4,6 @@
 #set ($obj=$factory.getById($Integer.parseInt($params.key)))
 #set ($obj.description = $!params.description)
 #set ($obj.configOpts = $!params.configOpts)
+$roles.setRolesForProfile($obj, $params.getValues("roles[]"))
 $factory.save($obj)
 ##$response.sendRedirect("$root/profiles/index.vm")

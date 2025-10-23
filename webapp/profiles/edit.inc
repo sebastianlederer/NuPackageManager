@@ -1,3 +1,4 @@
+#set($form_action="edit")
 <div id="dialog-form-edit" title="Profil bearbeiten">
 	<p class="validateTips">All form fields are required.</p>
 	<form id="form-edit" method="post" accept-charset="ISO-8859-2" action="$root/$module/edit-action.vm">
@@ -29,6 +30,21 @@
 		</select>
 		</div>
 		</div>
+		<br>
+		<fieldset>
+			<legend>Rollen</legend>
+			<div id="${form_action}_checkboxes" class="checkboxfield">
+#set($colorindex = 1)
+#foreach($role in $rolenames)
+				<input type="checkbox" name="$role" value="$role" id="${form_action}_r_$role"/>
+				<label class="cell$colorindex" for="${form_action}_r_$role">$role</label>
+#set($colorindex = $colorindex + 1)
+#if($colorindex > $colorwheel.size())
+#set($colorindex = 1)
+#end
+#end
+			</div>
+		</fieldset>
 	</fieldset>
 	</form>
 </div>
@@ -59,6 +75,18 @@ function form_update_selects(o) {
 }
 ]]#
 function form_edit_load(o) {
+				$.post("$root/$module/roles.json.vm?key=" + o.id)
+				.done(function(result) {
+					var checkboxes = $("#${form_action}_checkboxes input");
+					checkboxes.each(function() {
+							const name = $(this).val();
+							$(this).prop("checked", result.includes(name));
+					});
+				})
+				.fail(function() {
+					alert("POST error");
+				});
+
 				$('#addmember').unbind('click');
 				$('#addmember').click(function() {
 					var m=$('#nonmembers').val();
@@ -89,5 +117,29 @@ function form_edit_validate() {
 	return checkIdentifier(name);
 }
 
-#js_form_submit("edit" "profiles" "id")
+function form_${form_action}_submit() {
+	var checkboxes = $("#${form_action}_checkboxes input");
+	var roles = [];
+	checkboxes.each(function() {
+			if($(this).prop("checked")) {
+				roles.push($(this).val());
+			}
+		}
+	);
+
+	$.post("$root/$module/edit-action.vm",
+		{
+			"key":		$("#dialog-form-edit #key").val(),
+			"name": 	$("#dialog-form-edit #name").val(),
+			"description":	$("#dialog-form-edit #description").val(),
+			"configOpts":	$("#dialog-form-edit #configOpts").val(),
+			"roles":	roles
+		})
+	.done(function() {
+		forceRefresh();
+	})
+	.fail(function() {
+		alert("POST error");
+	});
+}
 </script>

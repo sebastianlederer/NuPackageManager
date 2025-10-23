@@ -101,6 +101,18 @@ def watch_db(db,id,handler):
         cursor.close()
 
 
+def list_roles(dbconn, hostname):
+    with dbconn.cursor() as cursor:
+        cursor.execute("""
+            SELECT DISTINCT role.name FROM role
+            WHERE role.host = (SELECT id FROM host WHERE name = %s)
+            OR role.profile = (SELECT profile FROM host WHERE name= %s)
+            ORDER BY name ASC;
+        """, (hostname, hostname))
+        for r in cursor.fetchall():
+            print(r.name)
+
+
 def main():
     global dbconn
     config.read_config()
@@ -111,18 +123,23 @@ def main():
 
     while reconnect:
         if dbconn is None or dbconn.closed:
-            time.sleep(5)
             try:
                 dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
             except psycopg2.OperationalError as e:
                 print("database connection failed", e)
+                time.sleep(5)
                 continue
 
         if cmd == "watch":
             print("database connection established", dbconn)
             watch_db(dbconn, 1, update_handler)
         elif cmd == "schedule":
+            reconnect = False
             process_schedule(dbconn, sys.argv[2])
+        elif cmd == "listroles":
+            reconnect = False
+            list_roles(dbconn, sys.argv[2])
+        else:
             reconnect = False
     try:
         dbconn.close()

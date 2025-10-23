@@ -1,15 +1,18 @@
 package de.dassit.nupama;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
@@ -94,6 +97,39 @@ public class RoleService {
 				return null;
 			}
 		});
+	}
+
+	public void setRolesForProfile(Profile p, String[] rolenames) throws SQLException {
+		TransactionManager.callInTransaction(DbConnection.getConnectionSource(),
+				new Callable<Void>() {
+			public Void call() throws Exception {
+				DeleteBuilder<Role,Object> b = dao.deleteBuilder();
+				b.where().eq(Role.PROFILE_FIELD_NAME, p.getId());
+				b.delete();
+				for(String n:rolenames) {
+					Role r = makeNew();
+					r.setProfile(p);
+					r.setName(n);
+					save(r);
+				}
+				return null;
+			}
+		});
+	}
+
+	public List<String> getCombinedRoleNames(Host h) throws SQLException {
+		Profile p = h.getProfile();
+
+		List<String> result = new ArrayList<String>();
+		QueryBuilder<Role,Object> q = dao.queryBuilder();
+		if(p == null)
+			q.where().eq("host", h.getId());
+		else
+			q.where().eq("host", h.getId()).or().eq("profile", p.getId());
+		List<Role> roles = q.orderBy("name", true).query();
+		for(Role r:roles)
+			result.add(r.getName());
+		return result.stream().distinct().collect(Collectors.toList());
 	}
 
 	public void save(Role r) throws SQLException {

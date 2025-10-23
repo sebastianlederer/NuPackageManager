@@ -22,6 +22,9 @@
 				<input type="radio" name="action" id="pactionConfigure" value="config">
 				<label for="pactionConfigure">Konfiguration</label>
 				<br>
+				<input type="radio" name="action" id="actionRoles" value="roles">
+				<label for="actionRoles">Rollen anwenden</label>
+				<br>
 				<input type="radio" name="action" id="pactionUpdate" value="update">
 				<label for="pactionUpdate">Update</label>
 				<br>
@@ -130,6 +133,7 @@ function form_${form_action}_submit() {
 	var args = "";
 
 	if($("#pactionReport:checked").val() !== undefined) action = "report";
+	if($("#actionRoles:checked").val() !== undefined) action = "roles";
 	if($("#pactionConfigure:checked").val() !== undefined) action = "config";
 	if($("#pactionUpdate:checked").val() !== undefined) action = "update";
 	if($("#pactionReboot:checked").val() !== undefined) action = "reboot";

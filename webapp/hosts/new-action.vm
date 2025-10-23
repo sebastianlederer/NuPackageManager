@@ -16,5 +16,6 @@
 #end
 #if($hosts_editable)
 $hosts.save($obj)
+$roles.setRolesForHost($obj, $params.getValues("roles[]"))
 #end
 #return_to_index("$module")
