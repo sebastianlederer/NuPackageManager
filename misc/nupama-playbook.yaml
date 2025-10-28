@@ -1,26 +1,19 @@
 ---
-- name: Test Playbook
+- name: Nupama Roles Playbook
   vars_prompt:
     - name: nupama_target
       prompt: Zielhost
       private: false
   vars:
-    nupama_roles: "{{ query('lines', 'python3 /build/nupama/backend/nupamabackend.py listroles ' + nupama_target) }}"
+    nupama_roles: >
+      {{ query('lines',
+      'python3 /build/nupama/backend/nupamabackend.py listroles '
+      + nupama_target) }}
   hosts: "{{ nupama_target }}"
   tasks:
-    - name: Test
-      debug:
-        msg: "{{ ansible_host }}"
-    - name: Test
-      debug:
-        msg: "{{ ansible_nodename }}"
-    - name: Test 2
+    - name: Configured Roles
       debug:
         msg: "{{ nupama_roles }}"
-    - name: Test 2 1/2
-      debug:
-        msg: "{{ item }}"
-      loop: "{{ nupama_roles }}"
     - name: Include Roles
       include_role:
         name: "{{ item }}"
