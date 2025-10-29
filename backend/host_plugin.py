@@ -351,12 +351,17 @@ def create_repo_conf_yum(repo, pubkeys):
     script += "type=rpm-md\n"
 
     if repo.pubkey and repo.pubkey != "":
-        script += "gpgcheck=1\n"
-        script += "gpgkey=file://etc/pki/rpm-gpg/RPM-GPG-KEY-{}\n".format(repo.name)
-        pubkeys.append((repo.name, repo.pubkey))
+        if repo.pubkey.startswith("file:"):
+            script += "gpgcheck=1\n"
+            script += "gpgkey={}\n".format(repo.pubkey)
+            pubkeys.append((repo.name, repo.pubkey))
+        else:
+            script += "gpgcheck=1\n"
+            script += "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-{}\n".format(repo.name)
+            pubkeys.append((repo.name, repo.pubkey))
     else:
         script += "gpgcheck=1\n"
-        script += "gpgkey=file://etc/pki/rpm-gpg/RPM-GPG-KEY-vendor\n"
+        script += "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-vendor\n"
 
     script += "enabled=1\n"
     script += "autorefresh=1\n"
