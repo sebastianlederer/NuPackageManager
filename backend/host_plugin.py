@@ -299,10 +299,20 @@ def perform_roles(dbconn, host):
 
     print(output)
 
-    if exitcode == 0:
-        return "OK " + output.splitlines()[-1][:78]
+    # remove trailing empty lines
+    while len(output) > 0 and output[-1].strip() == "":
+        del output[-1]
+
+    # remove multiple spaces
+    if len(output) > 0:
+        result = " ".join(output[-1].strip().split())
     else:
-        return "- " + output.splitlines()[-1][:78]
+        result = ""
+
+    if exitcode == 0:
+        return "OK " + result[:78]
+    else:
+        return "- " + result[:78]
 
 
 def create_repo_conf_apt(repo, pubkeys):

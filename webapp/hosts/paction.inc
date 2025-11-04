@@ -19,11 +19,11 @@
 				<input type="radio" name="action" id="pactionReport" value="report">
 				<label for="pactionReport">Report</label>
 				<br>
-				<input type="radio" name="action" id="pactionConfigure" value="config">
-				<label for="pactionConfigure">Konfiguration</label>
-				<br>
 				<input type="radio" name="action" id="actionRoles" value="roles">
 				<label for="actionRoles">Rollen anwenden</label>
+				<br>
+				<input type="radio" name="action" id="pactionConfigure" value="config">
+				<label for="pactionConfigure">Konfiguration</label>
 				<br>
 				<input type="radio" name="action" id="pactionUpdate" value="update">
 				<label for="pactionUpdate">Update</label>

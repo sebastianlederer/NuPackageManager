@@ -1,5 +1,5 @@
 #!/bin/sh
-psql="psql -U nupama nupama"
+psql="psql -U nupama nupama -h localhost"
 schema_version=$($psql -q -t -A -c "SELECT value FROM config WHERE key='schema_version'")
 schema_version=$schema_version
 orig_schema_version=$schema_version
@@ -47,6 +47,22 @@ then
 EOF
 	schema_version=5
 fi
+
+if [ "$schema_version" = 5 ]
+then
+	:
+	$psql -q -t -A <<EOF
+	CREATE TABLE role (id SERIAL PRIMARY KEY,
+        name VARCHAR(80) NOT NULL,
+        description VARCHAR(130),
+        profile INTEGER REFERENCES profile(id),
+        host INTEGER REFERENCES host(id)
+	);
+	UPDATE config SET value=6 WHERE key='schema_version';
+EOF
+	schema_version=6
+fi
+
 if [ "$orig_schema_version" != "$schema_version" ]
 then
 	echo upgraded schema version to $schema_version.

@@ -21,7 +21,7 @@
 #set($systems_requiring_reboot=0)
 #set($comps=$hosts.getAll())
 #foreach($c in $comps)
-#if($c.result != "OK")
+#if($c.result != "OK" && !$c.result.startsWith("OK:"))
 #set($systems_with_errors=$systems_with_errors+1)
 #end
 #if($c.updateCount>0 || $c.updateCountOrigin>0)
