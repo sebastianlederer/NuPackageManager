@@ -1,0 +1,16 @@
+#set($layout="json.vm")
+#set ($res=${response.setContentType("application/json")})
+
+#set($p=$profiles.getByName($params.key))
+#if(!$p)
+#set($rs=[])
+#else
+#set($rs=$roles.getByProfile($p))
+#end
+#set($sep="")
+[
+#foreach($r in $sorter.sort($rs,"name"))
+$sep"$r.name"
+#set($sep=",")
+#end
+]

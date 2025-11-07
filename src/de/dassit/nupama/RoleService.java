@@ -85,9 +85,7 @@ public class RoleService {
 		TransactionManager.callInTransaction(DbConnection.getConnectionSource(),
 				new Callable<Void>() {
 			public Void call() throws Exception {
-				DeleteBuilder<Role,Object> b = dao.deleteBuilder();
-				b.where().eq(Role.HOST_FIELD_NAME, h.getId());
-				b.delete();
+				clearRolesForHost(h);
 				for(String n:rolenames) {
 					Role r = makeNew();
 					r.setHost(h);
@@ -99,13 +97,17 @@ public class RoleService {
 		});
 	}
 
+	public void clearRolesForHost(Host h) throws SQLException {
+		DeleteBuilder<Role,Object> b = dao.deleteBuilder();
+		b.where().eq(Role.HOST_FIELD_NAME, h.getId());
+		b.delete();	
+	}
+
 	public void setRolesForProfile(Profile p, String[] rolenames) throws SQLException {
 		TransactionManager.callInTransaction(DbConnection.getConnectionSource(),
 				new Callable<Void>() {
 			public Void call() throws Exception {
-				DeleteBuilder<Role,Object> b = dao.deleteBuilder();
-				b.where().eq(Role.PROFILE_FIELD_NAME, p.getId());
-				b.delete();
+				clearRolesForProfile(p);
 				for(String n:rolenames) {
 					Role r = makeNew();
 					r.setProfile(p);
@@ -115,6 +117,12 @@ public class RoleService {
 				return null;
 			}
 		});
+	}
+
+	public void clearRolesForProfile(Profile p) throws SQLException {
+		DeleteBuilder<Role,Object> b = dao.deleteBuilder();
+		b.where().eq(Role.PROFILE_FIELD_NAME, p.getId());
+		b.delete();
 	}
 
 	public List<String> getCombinedRoleNames(Host h) throws SQLException {

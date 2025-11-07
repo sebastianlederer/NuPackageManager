@@ -7,5 +7,6 @@
 #foreach ($r in $repo_members)
 $profilerepos.removeRepoFromProfile($r,$obj)
 #end
+$roles.clearRolesForProfile($obj)
 $profiles.delete($obj)
 $response.sendRedirect("$root/$module/index.vm")

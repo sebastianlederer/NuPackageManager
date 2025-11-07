@@ -2,7 +2,9 @@
 #set($colorindex=1)
 #foreach($c in $colorwheel)
 input[type="checkbox"] + label.cell$colorindex { color: black; background: white; border-color: $c; }
-input[type="checkbox"]:checked + label.cell$colorindex { color: white; border-color: $c; background-color: $c; }
+input[type="checkbox"]:checked + label.cell$colorindex { color: white; background-image:none; border-color: $c; background-color: $c; }
+.checkboxfield input[type="checkbox"] + label.earmarked$colorindex { background-image: linear-gradient(135deg, $c, white 15%); }
+.checkboxfield input[type="checkbox"]:checked + label.earmarked$colorindex { background-image: none; }
 #set($colorindex=$colorindex+1)
 #end
 
@@ -28,4 +30,5 @@ input[type="checkbox"]:checked + label.cell$colorindex { color: white; border-co
 	text-align: center;
 	margin: 0;
 }
+
 </style>

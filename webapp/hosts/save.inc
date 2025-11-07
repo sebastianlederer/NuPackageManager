@@ -42,6 +42,33 @@
 	</form>
 </div>
 <script type="text/javascript">
+function form_${form_action}_update_earmarks(profileName) {
+				$.post("$root/profiles/roles_byname.json.vm?key="+profileName)
+				.done(function(result) {
+					const labels = $("#${form_action}_checkboxes label");
+					const start = "${form_action}_r_".length;
+					console.log(result);
+					var i = 1;
+					labels.each(function() {
+						var name = $(this).attr("for");
+						name = name.slice(start);
+						console.log(name);
+						console.log(result.includes(name));
+						if(result.includes(name))
+							$(this).addClass("earmarked" + i);
+						else
+							$(this).removeClass("earmarked" + i);
+						i = i + 1;
+						if(i > $colorwheel.size())
+							i = 1;
+					});
+				})
+				.fail(function() {
+					alert("POST error");
+				});
+
+}
+
 #if($isNewAction)
 function form_${form_action}_load(o) {
 				$("fieldset[name=$form_action] #key").val('');
@@ -51,6 +78,11 @@ function form_${form_action}_load(o) {
 				$("fieldset[name=$form_action] #macAddress").val('');
 				$("select#profileName").val("");
 				$("fieldset[name=$form_action] #options").val('');
+
+				$("fieldset[name=$form_action] #profileName").change(function() {
+					const profileName = $("fieldset[name=$form_action] #profileName").val();
+				        form_${form_action}_update_earmarks(profileName);
+				});
 }
 #else
 function form_${form_action}_load(o) {
@@ -66,6 +98,8 @@ function form_${form_action}_load(o) {
 					alert("POST error");
 				});
 
+				form_${form_action}_update_earmarks(o.profileName);
+
 				$("fieldset[name=$form_action] #key").val(o.id);
 				$("fieldset[name=$form_action] #name").val(o.name);
 				$("fieldset[name=$form_action] #description").val(o.description);
@@ -75,6 +109,11 @@ function form_${form_action}_load(o) {
 				if(o.profileName!="") {
 					$("select#profileName").val(o.profileName);
 				}
+
+				$("fieldset[name=$form_action] #profileName").change(function() {
+					const profileName = $("fieldset[name=$form_action] #profileName").val();
+				        form_${form_action}_update_earmarks(profileName);
+				});
 }
 #end
 
