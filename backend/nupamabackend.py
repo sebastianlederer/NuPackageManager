@@ -4,6 +4,7 @@ import time
 import psycopg2
 import psycopg2.extras
 import psycopg2.extensions
+import json
 import repo_plugin,host_plugin
 import config
 import traceback
@@ -113,6 +114,73 @@ def list_roles(dbconn, hostname):
             print(r.name)
 
 
+def guess_type(s):
+    result = s
+
+    ls = s.lower()
+    if ls in [ "yes", "no", "true", "false" ]:
+        return ls in [ "yes", "true" ]
+
+    try:
+        return int(ls)
+    except:
+        pass
+
+    try:
+        return float(ls)
+    except:
+        pass
+    return result
+
+
+def list_inventory(dbconn):
+    with dbconn.cursor() as cursor:
+        cursor.execute("""
+            SELECT name, options FROM host;
+        """);
+        hosts = []
+        host_options = {}
+        for hostname, options in cursor.fetchall():
+            hosts.append(hostname)
+            if options is not None:
+                options = options.strip()
+            else:
+                options = ""
+            if options != "":
+                host_options[hostname] = options
+
+        cursor.execute("""
+            SELECT host.name, role.name as role FROM host, role
+            WHERE host.id = role.host""")
+
+        host_roles = {}
+        for r in cursor.fetchall():
+            hostname, role = r
+            if hostname in host_roles:
+                host_roles[hostname].append(role)
+            else:
+                host_roles[hostname] = [ role ]
+
+        inventory = { "nupama": { "hosts": [] }, "_meta": { "hostvars": {}}}
+
+        for h in hosts:
+            inventory["nupama"]["hosts"].append(h)
+            if h in host_options:
+                opts = {}
+                opts_string = host_options[h]
+                parts = opts_string.split(",")
+                for p in parts:
+                    try:
+                        key,value = p.split("=")
+                        key = key.strip()
+                        value = value.strip()
+                        opts[key] = guess_type(value)
+                    except:
+                        pass
+                inventory["_meta"]["hostvars"][h] = opts
+        print(json.dumps(inventory))
+
+
 def main():
     global dbconn
     config.read_config()
@@ -139,6 +207,9 @@ def main():
         elif cmd == "listroles":
             reconnect = False
             list_roles(dbconn, sys.argv[2])
+        elif cmd == "ansible-inventory":
+            reconnect = False
+            list_inventory(dbconn)
         else:
             reconnect = False
     try:
