@@ -299,6 +299,8 @@ def perform_roles(dbconn, host):
 
     print(output)
 
+    output = output.splitlines()
+
     # remove trailing empty lines
     while len(output) > 0 and output[-1].strip() == "":
         del output[-1]
