@@ -7,10 +7,15 @@
   vars:
     nupama_roles: >
       {{ query('lines',
-      'python3 /build/nupama/backend/nupamabackend.py listroles '
+      'python3 /nupama/backend/nupamabackend.py listroles '
       + nupama_target) }}
   hosts: "{{ nupama_target }}"
   tasks:
+    - name: verify dynamic inventory
+      assert:
+        that:
+          - nupama_dynamic_inventory is defined
+          - nupama_dynamic_inventory == true
     - name: Configured Roles
       debug:
         msg: "{{ nupama_roles }}"

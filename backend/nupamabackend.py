@@ -161,7 +161,8 @@ def list_inventory(dbconn):
             else:
                 host_roles[hostname] = [ role ]
 
-        inventory = { "nupama": { "hosts": [] }, "_meta": { "hostvars": {}}}
+        inventory = { "nupama": { "hosts": [], "vars": { "nupama_dynamic_inventory": True }},
+            "_meta": { "hostvars": {}}}
 
         for h in hosts:
             inventory["nupama"]["hosts"].append(h)
@@ -178,6 +179,7 @@ def list_inventory(dbconn):
                     except:
                         pass
                 inventory["_meta"]["hostvars"][h] = opts
+
         print(json.dumps(inventory))
 
 
