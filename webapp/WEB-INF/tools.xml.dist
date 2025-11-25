@@ -44,6 +44,7 @@
     <tool key="repos" class="de.dassit.nupama.RepositoryService"/>
     <tool key="profiles" class="de.dassit.nupama.ProfileService"/>
     <tool key="profilerepos" class="de.dassit.nupama.ProfileRepoService"/>
+    <tool key="roles" class="de.dassit.nupama.RoleService"/>
     <tool key="hosts" class="de.dassit.nupama.HostService"/>
     <tool key="packages" class="de.dassit.nupama.PackageService"/>
     <tool key="instpackages" class="de.dassit.nupama.InstalledPackageService"/>
