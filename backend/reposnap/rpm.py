@@ -11,6 +11,8 @@ import reposnap.fetch
 import reposnap.getmodified as getmodified
 import reposnap.filter_href
 import reposnap.rpm
+import rpm_cmp
+
 try:
     import pyzstd
 except ImportError:
@@ -144,6 +146,9 @@ def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
     with open_func(path, "rb") as f:
         root = ET.parse(f)
 
+    version_cache = {}
+    vcmp = rpm_cmp.VersionComparator()
+
     for e in root.iterfind("metadata:package", namespaces):
         if e.get("type") != "rpm":
             continue
@@ -178,6 +183,25 @@ def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
         if filter_regex is not None and filter_regex.match(name + "-" + version):
             continue
         if href is not None:
+            key = name + '.' + arch
+            # debug
+            if name == 'microcode_ctl':
+                print(key, version)
+                if key in version_cache:
+                    print("version_cache:", version_cache[key])
+                    print("compare:", vcmp.compare(version_cache[key], version))
+                    print("compare2:", vcmp.compare("1", "2"))
+            if key in version_cache:
+                version_b = version_cache[key]
+                if vcmp.compare(version_b, version) < 0:
+                    version_cache[key] = version
+                else:
+                    # ignore older versions of packages we have
+                    # already seen
+                    continue
+            else:
+                version_cache[key] = version
+
             results.append((href, name, version, arch, description))
 
     return results
