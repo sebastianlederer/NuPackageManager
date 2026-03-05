@@ -136,7 +136,8 @@ def guess_type(s):
 def list_inventory(dbconn):
     with dbconn.cursor() as cursor:
         cursor.execute("""
-            SELECT name, options FROM host;
+            SELECT name, options FROM host
+            ORDER BY name ASC
         """);
         hosts = []
         host_options = {}
@@ -151,7 +152,9 @@ def list_inventory(dbconn):
 
         cursor.execute("""
             SELECT host.name, role.name as role FROM host, role
-            WHERE host.id = role.host""")
+            WHERE host.id = role.host
+            ORDER BY role.name ASC
+        """)
 
         host_roles = {}
         for r in cursor.fetchall():

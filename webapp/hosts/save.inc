@@ -145,7 +145,7 @@ function form_${form_action}_submit() {
 			"description":	$("fieldset[name=$form_action] #description").val(),
 			"ipAddress":	$("fieldset[name=$form_action] #ipAddress").val(),
 			"macAddress":	$("fieldset[name=$form_action] #macAddress").val(),
-			"options":	$("fieldset[name=$form_action] #option").val(),
+			"options":	$("fieldset[name=$form_action] #options").val(),
 			"profileName":	$("#dialog-form-$form_action select#profileName").val(),
 			"roles":	roles
 		})
