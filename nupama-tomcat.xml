@@ -8,7 +8,6 @@
   <target name="start">
     <echo>Start Tomcat</echo>
     <java classname="org.apache.catalina.startup.Bootstrap" fork="true" spawn="true" classpathref="tomcat.class.path">
-      <jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"/>
       <jvmarg value="-Dcatalina.home=${server.location}/${server.name}"/>
       <jvmarg value="-Dorg.slf4j.simpleLogger.defaultLogLevel=info"/>
       <jvmarg value="-Djavax.net.ssl.trustStore=${server.truststore.file}"/>

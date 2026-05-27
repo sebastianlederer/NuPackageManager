@@ -7,17 +7,50 @@
 #else
 #set ($disable_flag=true)
 #end
-#parse("roles.inc")
-#parse("colorwheel.inc")
 	<SCRIPT type="text/javascript">
 
 #js_default_formatters()
 #js_error_handler()
 #js_search("name")
-	function AlertFormatter(row,cell,value,columnDef,dataContext) {
-		// return (value) ?  '<span title="Reboot" class="ui-icon ui-icon-notice" style="display:inline-block"></span>' : "";
-		return (value) ?  '<span style="color:darkred">Reboot erforderlich</span>' : "";
+	var pendingRebootHostId = null;
+
+	function openRebootDialog(hostId, hostName) {
+		pendingRebootHostId = hostId;
+		$("#dialog-reboot-msg").html("Host <b>" + hostName + "</b> jetzt neu starten?");
+		$("#dialog-reboot-confirm").dialog("open");
 	}
+
+	function RebootFormatter(row,cell,value,columnDef,dataContext) {
+		if (!value) return "";
+		var safeName = String(dataContext.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+		return "<span style='color:darkred;cursor:pointer' " +
+			"title='Klicken um Reboot durchzuführen' " +
+			"onclick=\"openRebootDialog(" + dataContext.id + ", '" + safeName + "')\">" +
+			"Reboot erforderlich</span>";
+	}
+
+
+	var pendingUpdateHostId = null;
+
+	function openUpdateDialog(hostId, hostName, updateCount) {
+		pendingUpdateHostId = hostId;
+		var msg = "<b>" + updateCount + " Update" + (updateCount !== 1 ? "s" : "") + "</b> für <b>" + hostName + "</b> installieren?";
+		$("#dialog-update-msg").html(msg);
+		$("#dialog-update-confirm").dialog("open");
+	}
+
+	function HostUpdateFormatter(row, cell, value, columnDef, dataContext) {
+		if (value == null || value === "0" || value == 0) {
+			return "&nbsp;-&nbsp;";
+		} else {
+			var safeName = String(dataContext.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+			return "<span class='counter' style='cursor:pointer' " +
+				"title='Klicken um Updates zu installieren' " +
+				"onclick=\"openUpdateDialog(" + dataContext.id + ", '" + safeName + "', " + value + ")\">" +
+				"&nbsp;" + value + "&nbsp;</span>";
+		}
+	}
+
 
 
 	var grid;
@@ -31,15 +64,15 @@
 	/*	{id: "macAddress", name: "MAC-Adresse", field: "macAddress", cssClass: "mycell" }, */
 		{id: "action", name: "Aktion", field: "action", cssClass: "mycell" },
 		{id: "result", name: "Status", field: "result", cssClass: "mycell" },
-		{id: "updateCount", name: "Updates", field: "updateCount", cssClass: "mycell", formatter: DiffCountFormatter },
+		{id: "updateCount", name: "Updates", field: "updateCount", cssClass: "mycell", formatter: HostUpdateFormatter },
 		{id: "updateCountOrigin", name: "Updates (Ursprung)", field: "updateCountOrigin", cssClass: "mycell", formatter: DiffCountFormatter },
-		{id: "rebootRequired", name: "Reboot erf.", field: "rebootRequired", cssClass: "mycell", formatter: AlertFormatter },
+		{id: "rebootRequired", name: "Reboot erf.", field: "rebootRequired", cssClass: "mycell", formatter: RebootFormatter },
 	];
 
 	$(document).ready(function () {
 
 #js_create_grid("columns", true)
-		grid.registerPlugin(new Slick.AutoTooltips());
+
 #if($hosts_editable)
 		grid.onSelectedRowsChanged.subscribe(function() {
 			const selCount = grid.getSelectedRows().length;
@@ -98,6 +131,56 @@
 
 #end
 
+	$("#dialog-reboot-confirm").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+		width: 440,
+		buttons: {
+			"Reboot starten": function() {
+				$(this).dialog("close");
+				$.post("$root/$module/action-action.vm", {
+					"action": "reboot",
+					"key[]": [pendingRebootHostId]
+				})
+				.done(function() {
+					#js_load_data($module "name")
+				})
+				.fail(function(response) {
+					alert("Fehler beim Starten des Reboots: " + response.responseText);
+				});
+			},
+			"Abbrechen": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$("#dialog-update-confirm").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+		width: 440,
+		buttons: {
+			"Update starten": function() {
+				$(this).dialog("close");
+				$.post("$root/$module/action-action.vm", {
+					"action": "update",
+					"key[]": [pendingUpdateHostId]
+				})
+				.done(function() {
+					#js_load_data($module "name")
+				})
+				.fail(function(response) {
+					alert("Fehler beim Starten des Updates: " + response.responseText);
+				});
+			},
+			"Abbrechen": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
 #js_load_data($module,"name")
 
 	});
@@ -147,3 +230,5 @@
 #end
 #parse("$module/action.inc")
 #parse("$module/paction.inc")
+
+#parse("$module/shortcuts.inc")

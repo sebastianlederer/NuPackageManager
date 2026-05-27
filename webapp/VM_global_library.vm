@@ -355,7 +355,7 @@ $!_p.value#end
 		if (value == null || value === "0" || value==0) {
 			return "&nbsp;-&nbsp";
     		} else {
-      			return "<span style='color:white;background:#e05050;border-radius:8px'>&nbsp;" + value + "&nbsp;</span>";
+			return '<span class="counter">&nbsp;' + value + '&nbsp;</span>';
 		}
 	}
 

@@ -189,3 +189,9 @@
 	border-radius: 0.5em;
 	border: 1px solid lightgrey;
 }
+
+.counter {
+	color: white;
+	background:#e05050;
+	border-radius:8px;
+}
