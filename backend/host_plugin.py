@@ -13,6 +13,8 @@ HostTuple = namedtuple("HostTuple", "id name profile action action_args index ma
 
 command_prefix = ''
 
+VALID_TIME = 3*30*24*60*60  # three months grace period for valid-until
+
 
 def set_taskstatus(dbconn, host, cur, max, current_action):
     with dbconn.cursor() as cursor:
@@ -317,34 +319,37 @@ def perform_roles(dbconn, host):
         return "- " + result[:78]
 
 
-def create_repo_conf_apt(repo, pubkeys):
+def create_repo_conf_apt(repo, pubkeys, trusted=False, min_valid_time=VALID_TIME):
     download_url = config.server_url
     repo_path = config.repo_path
 
-    script = ""
-    if repo.arch and repo.arch != '':
-        arch_spec = "arch={}".format(repo.arch)
-    else:
-        arch_spec = ""
-
-    if repo.pubkey and repo.pubkey != "":
-        sign_spec = "signed-by=/etc/apt/keyrings/{}.gpg".format(repo.name)
-        pubkeys.append((repo.name, repo.pubkey))
-    else:
-        sign_spec = ""
-
-    if sign_spec != "" or arch_spec != "":
-        repo_opts = "[{} {}]".format(arch_spec, sign_spec)
-    else:
-        repo_opts = ""
+    script =  "# {}\n".format(repo.name)
+    script += "Types: deb\n"
 
     if repo.dist and repo.dist != "":
         dist_spec = repo.dist
     else:
         dist_spec = "/"
 
-    script += "deb {} {}{}{} {} {} # {}\n".format(repo_opts,
-            download_url, repo_path, str(repo.id), dist_spec, repo.component, repo.name)
+    script += "URIs: {}{}{}\n".format(download_url, repo_path, str(repo.id))
+    script += "Suites: {}\n".format(dist_spec)
+
+    if repo.component and repo.component != "":
+        script += "Components: {}\n".format(repo.component)
+
+    if repo.arch and repo.arch != '':
+        script += "Architectures: {}\n".format(repo.arch)
+
+    if repo.pubkey and repo.pubkey != "":
+        script += "Signed-By: /etc/apt/keyrings/{}.gpg\n".format(repo.name)
+        pubkeys.append((repo.name, repo.pubkey))
+
+    if trusted:
+        script += "Trusted: yes\n"
+
+    if min_valid_time is not None:
+        script += "Min-Valid-Until: {}\n".format(min_valid_time)
+
     return script
 
 
@@ -384,6 +389,8 @@ def create_repo_conf_yum(repo, pubkeys):
 def create_repo_conf(repo, pubkeys):
     if repo.type == "apt":
         return create_repo_conf_apt(repo, pubkeys)
+    elif repo.type == "apt-trusted":
+        return create_repo_conf_apt(repo, pubkeys, trusted=True)
     elif repo.type == "rpm":
         return create_repo_conf_yum(repo, pubkeys)
     else:

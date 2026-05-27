@@ -21,7 +21,7 @@
 
 <tools>
   <data key="root">/nupama</data>
-  <data key="repo_types" type="list" value="apt,rpm"/>
+  <data key="repo_types" type="list" value="apt,apt-trusted,rpm"/>
   <data key="schedules" type="list" value="-,daily,weekly,monthly"/>
   <data key="hosts_editable" value="true"/>
   <data key="config_button" value="false"/>
