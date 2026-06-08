@@ -23,6 +23,7 @@
 		#dropdown( "profileName", $profile_names, "") 
 		<br>
 		#inputbox("options","Optionen",true)
+#if($roles)
 		<br>
 		<fieldset>
 			<legend>Rollen</legend>
@@ -39,6 +40,7 @@
 			</div>
 		</fieldset>
 	</fieldset>
+#end
 	</form>
 </div>
 <script type="text/javascript">
@@ -81,11 +83,14 @@ function form_${form_action}_load(o) {
 
 				$("fieldset[name=$form_action] #profileName").change(function() {
 					const profileName = $("fieldset[name=$form_action] #profileName").val();
+#if($roles)
 				        form_${form_action}_update_earmarks(profileName);
+#end
 				});
 }
 #else
 function form_${form_action}_load(o) {
+#if($roles)
 				$.post("$root/$module/roles.json.vm?key="+o.id)
 				.done(function(result) {
 					var checkboxes = $("#${form_action}_checkboxes input");
@@ -99,7 +104,7 @@ function form_${form_action}_load(o) {
 				});
 
 				form_${form_action}_update_earmarks(o.profileName);
-
+#end
 				$("fieldset[name=$form_action] #key").val(o.id);
 				$("fieldset[name=$form_action] #name").val(o.name);
 				$("fieldset[name=$form_action] #description").val(o.description);
@@ -110,10 +115,12 @@ function form_${form_action}_load(o) {
 					$("select#profileName").val(o.profileName);
 				}
 
+#if($roles)
 				$("fieldset[name=$form_action] #profileName").change(function() {
 					const profileName = $("fieldset[name=$form_action] #profileName").val();
 				        form_${form_action}_update_earmarks(profileName);
 				});
+#end
 }
 #end
 
@@ -131,13 +138,14 @@ function form_${form_action}_validate() {
 function form_${form_action}_submit() {
 	var checkboxes = $("#${form_action}_checkboxes input");
 	var roles = [];
+#if($roles)
 	checkboxes.each(function() {
 			if($(this).prop("checked")) {
 				roles.push($(this).val());
 			}
 		}
 	);
-
+#end
 	$.post("$root/$module/${form_action}-action.vm",
 		{
 			"key":		$("fieldset[name=$form_action] #key").val(),

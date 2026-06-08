@@ -17,9 +17,11 @@
 			<span class="radiogroup">
 				<input type="radio" name="action" id="actionReport" value="report">
 				<label for="actionReport">Report</label>
+#if($roles)
 				<br>
 				<input type="radio" name="action" id="actionRoles" value="roles">
 				<label for="actionRoles">Rollen anwenden</label>
+#end
 				<br>
 				<input type="radio" name="action" id="actionConfigure" value="config">
 				<label for="actionConfigure">Konfiguration</label>

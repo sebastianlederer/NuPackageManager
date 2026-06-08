@@ -18,9 +18,11 @@
 			<span class="radiogroup">
 				<input type="radio" name="action" id="pactionReport" value="report">
 				<label for="pactionReport">Report</label>
+#if($roles)
 				<br>
 				<input type="radio" name="action" id="actionRoles" value="roles">
 				<label for="actionRoles">Rollen anwenden</label>
+#end
 				<br>
 				<input type="radio" name="action" id="pactionConfigure" value="config">
 				<label for="pactionConfigure">Konfiguration</label>

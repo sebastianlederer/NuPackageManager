@@ -30,6 +30,7 @@
 		</select>
 		</div>
 		</div>
+#if($roles)
 		<br>
 		<fieldset>
 			<legend>Rollen</legend>
@@ -45,6 +46,7 @@
 #end
 			</div>
 		</fieldset>
+#end
 	</fieldset>
 	</form>
 </div>
@@ -75,6 +77,7 @@ function form_update_selects(o) {
 }
 ]]#
 function form_edit_load(o) {
+#if($roles)
 				$.post("$root/$module/roles.json.vm?key=" + o.id)
 				.done(function(result) {
 					var checkboxes = $("#${form_action}_checkboxes input");
@@ -86,7 +89,7 @@ function form_edit_load(o) {
 				.fail(function() {
 					alert("POST error");
 				});
-
+#end
 				$('#addmember').unbind('click');
 				$('#addmember').click(function() {
 					var m=$('#nonmembers').val();
@@ -120,13 +123,14 @@ function form_edit_validate() {
 function form_${form_action}_submit() {
 	var checkboxes = $("#${form_action}_checkboxes input");
 	var roles = [];
+#if($roles)
 	checkboxes.each(function() {
 			if($(this).prop("checked")) {
 				roles.push($(this).val());
 			}
 		}
 	);
-
+#end
 	$.post("$root/$module/edit-action.vm",
 		{
 			"key":		$("#dialog-form-edit #key").val(),

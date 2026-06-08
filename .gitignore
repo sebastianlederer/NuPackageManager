@@ -8,3 +8,5 @@ build.properties
 **/__pycache__
 .classpath
 .project
+build.number
+webapp/buildnumber.vm
