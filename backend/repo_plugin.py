@@ -217,7 +217,7 @@ def mirror(dbconn, repo):
         fetched = []
 
         try:
-            if upstream.type == 'apt':
+            if upstream.type in ['apt', 'apt-trusted']:
                 suffix = ".deb"
                 print("  components ", upstream.component)
 
@@ -228,7 +228,7 @@ def mirror(dbconn, repo):
                     [ "all", upstream.arch ],
                     progress_updater = lambda p: progress_updater(dbconn, p) )
 
-            elif upstream.type == 'rpm':
+            elif upstream.type in ['rpm', 'rpm-unsigned']:
                 suffix = ".rpm"
                 localdir = get_local_dir(repo)
                 fetched = reposnap.rpm.get_rpm_repo(upstream.url, localdir,

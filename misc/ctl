@@ -3,7 +3,7 @@ prg=nupamabackend
 LANG=de_DE.UTF-8
 export PATH LANG
 unset LC_ALL LC_MESSAGES
-pidpath=/var/run/nupama/$prg.pid
+pidpath=/var/run/$prg.pid
 
 cd $(dirname $0)
 
