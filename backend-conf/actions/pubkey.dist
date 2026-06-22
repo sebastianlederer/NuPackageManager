@@ -16,8 +16,15 @@ fi
 
 if [ -f /etc/dnf/dnf.conf ]
 then
-	sudo sh -c "cat >/etc/pki/rpm-gpg/$repo.gpg" <<EOF
+	if echo "$pubkey" | grep -q "^file://"
+	then	
+		url="$pubkey"
+		filename=$${url#file://}
+		sudo cp "$$filename" "/etc/pki/rpm-gpg/RPM-GPG-KEY-$repo"
+	else
+		sudo sh -c "cat >/etc/pki/rpm-gpg/RPM-GPG-KEY-$repo" <<EOF
 $pubkey
 EOF
-	sudo rpm --import /etc/pki/rpm-gpg/$repo.gpg
+	fi
+	sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-$repo
 fi
