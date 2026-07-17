@@ -2,7 +2,9 @@ package de.dassit.nupama;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,23 +44,41 @@ public class ProfileService {
 		return result;
 	}
 
-	public List<Profile> getAllWithCount() {
-		List<Profile> result = new ArrayList<Profile>();
+	public Map<Integer,Integer> getHostCounts() {
+		HashMap<Integer, Integer> result = new HashMap<Integer,Integer>();
 		try {
-			String queryStr = "select p.id, p.name, p.description, p.owner, p.config_opts, " + "count(p.id) "
-					+ "from profile as p,host where p.id = host.profile GROUP BY p.id";
-			DataType[] columnTypes = { DataType.INTEGER, DataType.STRING, DataType.STRING, DataType.STRING,
-                                        DataType.STRING, DataType.INTEGER };
+			String queryStr = "select profile.id, count(profile.id) "
+					+ "from profile,host where profile.id = host.profile GROUP BY profile.id";
+			DataType[] columnTypes = { DataType.INTEGER, DataType.INTEGER };
 			GenericRawResults<Object[]> rawResults = dao.queryRaw(queryStr, columnTypes);
-			for(Object[] row:rawResults) {
-				Profile p = new Profile();
-				p.setId((Integer)row[0]);
-				p.setName((String)row[1]);
-				p.setDescription((String)row[2]);
-				p.setOwner((String)row[3]);
-				p.setConfigOpts((String)row[4]);
-				p.setHostCount((Integer)row[5]);
-				result.add(p);
+			for (Object[] row : rawResults) {
+				Integer profileId = (Integer) row[0];
+				Integer hostCount = (Integer) row[1];
+				result.put(profileId, hostCount);
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
+		}
+		return result;
+	}
+
+	public Map<Integer, List<String>> getRepoMap() {
+		HashMap<Integer, List<String>> result = new HashMap<Integer, List<String>>();
+		try {
+			String queryStr = "select profile.id, repository.name from repository, profile, profile_repo "
+					+ "where repository.id = profile_repo.repo and profile.id = profile_repo.profile "
+					+ "order by profile.id,repository.name";
+			DataType[] columnTypes = { DataType.INTEGER, DataType.STRING };
+			GenericRawResults<Object[]> rawResults = dao.queryRaw(queryStr, columnTypes);
+			for (Object[] row : rawResults) {
+				Integer repoId = (Integer) row[0];
+				String repoName = (String) row[1];
+				List<String> repoNames = result.get(repoId);
+				if (repoNames == null) {
+					repoNames = new ArrayList<String>();
+				}
+				repoNames.add(repoName);
+				result.put(repoId, repoNames);
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);

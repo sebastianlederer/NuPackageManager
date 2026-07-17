@@ -20,7 +20,6 @@ public class Profile implements Cloneable, Serializable {
 	private String owner;
 	@DatabaseField(columnName = "config_opts", canBeNull = true)
 	private String configOpts;
-	private Integer hostCount;
 
 	public Integer getId() {
 		return id;
@@ -51,11 +50,5 @@ public class Profile implements Cloneable, Serializable {
 	}
 	public void setConfigOpts(String configOpts) {
 		this.configOpts = configOpts;
-	}
-	public Integer getHostCount() {
-		return hostCount;
-	}
-	public void setHostCount(Integer hostCount) {
-		this.hostCount = hostCount;
 	}
 }

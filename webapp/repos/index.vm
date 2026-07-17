@@ -28,6 +28,43 @@
 #end
 	<SCRIPT type="text/javascript">
 
+        var pendingUpdateRepoId = null;
+        var pendingMirrorRepoId = null;
+
+        function openUpdateDialog(repoId, repoName, updateCount) {
+                pendingUpdateRepoId = repoId;
+                var msg = "Repo <b>" + repoName + "</b> mit <b>" + updateCount + " Update" + (updateCount !== 1 ? "s" : "") + "</b> aktualisieren?";
+                $("#dialog-update-msg").html(msg);
+                $("#dialog-update-confirm").dialog("open");
+        }
+
+        function openMirrorDialog(repoId, repoName, updateCount) {
+                pendingMirrorRepoId = repoId;
+                var msg = "Repo <b>" + repoName + "</b> spiegeln?";
+                $("#dialog-mirror-msg").html(msg);
+                $("#dialog-mirror-confirm").dialog("open");
+        }
+
+        function RepoUpdateFormatter(row, cell, value, columnDef, dataContext) {
+                var safeName = String(dataContext.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+		if (dataContext.pred == 0) {
+                        return "<span style='cursor:pointer' " +
+                                "title='Klicken, um Repo zu spiegeln' " +
+                                "onclick=\"openMirrorDialog(" + dataContext.id + ", '" + safeName + "', " + value + ")\">" +
+                                "&nbsp; - &nbsp;</span>";
+		} else if (value == null || value === "0" || value == 0) {
+                        return "<span style='cursor:pointer' " +
+                                "title='Klicken, um Repo zu aktualisieren' " +
+                                "onclick=\"openUpdateDialog(" + dataContext.id + ", '" + safeName + "', " + value + ")\">" +
+                                "&nbsp; - &nbsp;</span>";
+                } else {
+                        return "<span class='counter' style='cursor:pointer' " +
+                                "title='Klicken, um Repo zu aktualisieren' " +
+                                "onclick=\"openUpdateDialog(" + dataContext.id + ", '" + safeName + "', " + value + ")\">" +
+                                "&nbsp;" + value + "&nbsp;</span>";
+                }
+        }
+
 	function post_error_handler(jqXHR, textStatus, errorThrown) {
 		alert("AJAX POST Error:"+errorThrown);
 	}
@@ -79,7 +116,7 @@
 		{id: "name", name: "Name", field: "name", cssClass: "mycell", formatter: IndentFormatter},
 		{id: "approved", name: "Freigegeben", field: "approved", cssClass: "mycell", formatter: CheckmarkFormatter},
 		{id: "pred", name: "Vorg&auml;nger", field: "pred", cssClass: "mycell" },
-		{id: "upd_count", name: "Updates (Vorgänger)", field: "upd_count", cssClass: "mycell", formatter: DiffCountFormatter}, 
+		{id: "upd_count", name: "Updates (Vorgänger)", field: "upd_count", cssClass: "mycell", formatter: RepoUpdateFormatter}, 
 		{id: "upd_count_origin", name: "Updates (Ursprung)", field: "upd_count_origin", cssClass: "mycell", formatter: DiffCountFormatter}, 
 		{id: "schedule", name: "Zeitplan", field: "schedule", cssClass: "mycell" },
 		{id: "lastUpdate", name: "Aktualisiert", field: "lastUpdate", cssClass: "mycell" },
@@ -171,6 +208,54 @@
 				if(updates>0) newLocation += "&show=updates";
 				window.location=newLocation;
 				});
+
+		$("#dialog-update-confirm").dialog({
+			autoOpen: false,
+			modal: true,
+			resizable: false,
+			width: 440,
+			buttons: {
+				"Aktualisierung starten": function() {
+					$(this).dialog("close");
+					$.post("$root/$module/update-action.vm", {
+						"key": pendingUpdateRepoId
+					})
+					.done(function() {
+						#js_load_data($module "id")
+					})
+					.fail(function(response) {
+						alert("Fehler beim Starten der Aktualisierung: " + response.responseText);
+					});
+				},
+				"Abbrechen": function() {
+					$(this).dialog("close");
+				}
+			}
+		});
+
+		$("#dialog-mirror-confirm").dialog({
+			autoOpen: false,
+			modal: true,
+			resizable: false,
+			width: 440,
+			buttons: {
+				"Spiegeln starten": function() {
+					$(this).dialog("close");
+					$.post("$root/$module/mirror-action.vm", {
+						"key": pendingMirrorRepoId
+					})
+					.done(function() {
+						#js_load_data($module "id")
+					})
+					.fail(function(response) {
+						alert("Fehler beim Starten der Spiegelung: " + response.responseText);
+					});
+				},
+				"Abbrechen": function() {
+					$(this).dialog("close");
+				}
+			}
+		});
 #js_searchbox()
 #if($viaprofile)
 #js_load_data_key("repos","id","profile=$params.profile")
@@ -212,4 +297,4 @@
 #parse("$module/approve.inc")
 #parse("$module/update.inc")
 #parse("$module/mirror.inc")
-
+#parse("$module/shortcuts.inc")

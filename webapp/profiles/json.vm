@@ -1,11 +1,13 @@
 #set ($layout="json.vm")
 #set ($dummy = $dbtool)
 #set ($res=${response.setContentType("application/json")})
+#set($repoMap=$profiles.repoMap)
+#set($hostCounts=$profiles.hostCounts)
 #if($params.key)
 #set ($res=$profiles.getById($params.key))
 #set ($pros=[ $res ])
 #{else}[
-#set ($pros=$profiles.getAllWithCount())
+#set ($pros=$profiles.getAll())
 #end
 #set ($count=$pros.size())
 #foreach ($pr in $sorter.sort($pros,"name"))
@@ -14,8 +16,13 @@
 #else
 #set ($sep="")
 #end
-#set($rps=$profilerepos.getReposFromProfile($pr))
-{ "id": $pr.id, "name": "$pr.name", "owner": "$!pr.owner", "description": "$!pr.description", "configOpts": "$!pr.configOpts", "repos": [#foreach($rp in $rps) "$rp.name"#if ($foreach.count!=$rps.size()),#{end}#{end} ], "hostcount": $!pr.hostCount }$!sep
+#set($rps=$repoMap[$pr.id])
+#if($hostCounts.containsKey($pr.id))
+#set($hc=$hostCounts[$pr.id])
+#else
+#set($hc=0)
+#end
+{ "id": $pr.id, "name": "$pr.name", "owner": "$!pr.owner", "description": "$!pr.description", "configOpts": "$!pr.configOpts", "repos": [#foreach($rp in $rps) "$rp"#if ($foreach.count!=$rps.size()),#{end}#{end} ], "hostcount": $!hc }$!sep
 #end
 #if(!$params.key)
 ]
