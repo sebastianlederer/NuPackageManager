@@ -11,6 +11,7 @@ ssh_key=None
 ssh_options=''
 command_timeout=None
 action_hook=None
+host_log_dir=None
 
 def getconf(section, key, default):
     if key in section:
@@ -22,6 +23,7 @@ def getconf(section, key, default):
 def read_config():
     global dsn, mirror_dir, server_url, repo_path
     global ssh_user, ssh_key, ssh_processes, ssh_timeout, ssh_options
+    global host_log_dir
 
     conffile = '../conf/backend.conf'
 
@@ -43,6 +45,7 @@ def read_config():
     command_timeout = int(getconf(section, 'command_timeout', 900))
     if 'action_hook' in section:
         action_hook = section['action_hook']
+    host_log_dir = getconf(section, 'host_log_dir', '../log/actions')
 
 
 def get_scriptlet(name):

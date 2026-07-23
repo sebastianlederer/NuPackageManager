@@ -6,6 +6,7 @@ import gzip
 import lzma
 import bz2
 import re
+import logging
 import xml.etree.ElementTree as ET
 import reposnap.fetch
 import reposnap.getmodified as getmodified
@@ -17,6 +18,8 @@ try:
     import pyzstd
 except ImportError:
     pyzstd = None
+
+logger = logging.getLogger("nupama")
 
 blacklist='../conf/rpm.blacklist'
 blacklist_re='../conf/rpm.blacklist.re'
@@ -66,7 +69,7 @@ def get_rpm_primary(url, repomd_path, localdir, progress_updater):
     primary_href = 'not found'
     for data_el in data_els:
         typeattr = data_el.get('type')
-        print(typeattr)
+        logger.debug(typeattr)
         location_el = data_el.find(prefix + 'location')
         href = location_el.get('href')
         if typeattr == 'primary':
@@ -74,7 +77,7 @@ def get_rpm_primary(url, repomd_path, localdir, progress_updater):
         reposnap.fetch.fetch(url, href, localdir, False)
 
     primary_path = os.path.join(localdir, primary_href)
-    print("primary_path:", primary_path)
+    logger.debug("primary_path:", primary_path)
     more_files = filter_packages_rpm(primary_path)
 
     total = len(more_files)
@@ -91,7 +94,7 @@ def get_rpm_primary(url, repomd_path, localdir, progress_updater):
         reposnap.fetch.fetch(url, f, localdir)
         new_count += 1
 
-    print(" {} new packages, {} total".format(new_count, count))
+    logger.info(" {} new packages, {} total".format(new_count, count))
 
     return more_files
 
@@ -136,7 +139,7 @@ def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
         if pyzstd is not None:
             open_func = pyzstd.open
         else:
-            printf("zst compression not supported")
+            logger.warning("zst compression not supported")
             return results
     else:
         open_func = open
@@ -184,13 +187,6 @@ def filter_packages_rpm(path, filter_sections=None, filter_regex=None):
             continue
         if href is not None:
             key = name + '.' + arch
-            # debug
-            if name == 'microcode_ctl':
-                print(key, version)
-                if key in version_cache:
-                    print("version_cache:", version_cache[key])
-                    print("compare:", vcmp.compare(version_cache[key], version))
-                    print("compare2:", vcmp.compare("1", "2"))
             if key in version_cache:
                 version_b = version_cache[key]
                 if vcmp.compare(version_b, version) < 0:

@@ -7,10 +7,13 @@ import re
 import gzip
 import lzma
 import http.client
+import logging
 
 import reposnap.fetch as fetch
 import reposnap.getmodified as getmodified
 import dpkg_cmp
+
+logger = logging.getLogger("nupama")
 
 blacklist='../conf/apt.blacklist'
 blacklist_re='../conf/apt.blacklist.re'
@@ -46,7 +49,6 @@ def process_record(data, results, filter_sections=None, filter_regex=None):
     description = b'Description:'
 
     if filename in data:
-        # print(data[filename],data[section], data[section] in filter_sections)
         if filter_sections is None or section not in data or data[section] not in filter_sections:
             arc = data[arch].decode('utf8')
             vers = data[version].decode('utf8')
@@ -55,14 +57,12 @@ def process_record(data, results, filter_sections=None, filter_regex=None):
             desc = data[description].decode('utf8')
 
             if filter_regex is not None and filter_regex.match(pack + "-" + vers):
-                #print("skipping(re blacklist)", pack)
                 return
 
             if fn.startswith('./'):
                 fn = fn[2:]
             results.append((fn, pack, vers, arc, desc))
         else:
-            #print("skipping (section blacklist)", data[filename], " ", data[section])
             pass
 
 
@@ -98,7 +98,7 @@ def filter_packages_apt(path, filter_sections=None, filter_regex=None):
 def fetch_simple_repo(url, localdir, archs=[], progress_updater=None):
     fetch.fetchdir(url, '', localdir, False)
 
-    print("fetching simple repo",url, archs)
+    logger.debug("fetching simple repo " + url + " " + str(archs))
 
     results = filter_packages_apt(os.path.join(localdir, 'Packages'))
 
@@ -119,9 +119,9 @@ def make_pkg_key(package, arch):
 
 
 def get_old_versions_dict(packages_gz, filter_sections, filter_regex):
-    print("reading old packages from", packages_gz, end="")
+    logger.debug("reading old packages from " + packages_gz)
     old_packages = filter_packages_apt(packages_gz, filter_sections, filter_regex)
-    print(" ({})".format(len(old_packages)))
+    logger.debug(" ({} packages)".format(len(old_packages)))
 
     c = dpkg_cmp.VersionComparator()
 
@@ -130,7 +130,6 @@ def get_old_versions_dict(packages_gz, filter_sections, filter_regex):
         key = make_pkg_key(package, arch)
         if key in result:
             if c.compare(result[key], version) == 1:
-                #print(" skipping version", version)
                 continue
         result[key] = version
     
@@ -154,7 +153,7 @@ def fetch_by_release_file(components, url, releasepath, localdir, archs):
             else:
                 if line[0] == " ":
                     chksum, fsize, fname = line.split()
-                    print("fetch",fname)
+                    logger.debug("fetch " + fname)
                     skip_this = False
                     file_arch_path = os.path.basename(os.path.dirname(fname))
                     if file_arch_path.startswith("binary-"):
@@ -165,13 +164,13 @@ def fetch_by_release_file(components, url, releasepath, localdir, archs):
                                 skip_this = False
                                 break
                     if skip_this:
-                        print("  skipping", file_arch_path, "file")
+                        logger.debug("  skipping " + file_arch_path + "file")
                         continue
 
                     try:
                         fetch.fetch(url, releasepath + fname, localdir)
                     except http.client.HTTPException as ex:
-                        print("  could not fetch", fname, ex)
+                        logger.warning("  could not fetch" + fname + " " + str(ex))
                         pass
 
                     # check if we need to add this file to the by-hash directory
@@ -179,18 +178,18 @@ def fetch_by_release_file(components, url, releasepath, localdir, archs):
                             [ "Release", "Packages", "Packages.gz", "Packages.xz" ]:
                         by_hash_name = os.path.join(os.path.dirname(releasepath + fname), \
                                     "by-hash", section, chksum)
-                        print(" +#",fname,"->",by_hash_name)
+                        logger.debug(" +# " + fname + " -> " + by_hash_name)
                         byhash_files.append(by_hash_name)
                 else:
                     break
 
     if byhash:
-        print("getting by-hash files:")
+        logger.debug("getting by-hash files:")
         for f in byhash_files:
             try:
                 fetch.fetch(url, f, localdir)
             except http.client.HTTPException:
-                print("  warning: could not fetch",f)
+                logger.warning("  warning: could not fetch " + f)
                 pass
 
 
@@ -211,7 +210,8 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
     total_results = []
     c = dpkg_cmp.VersionComparator()
 
-    print("fetching repo",url,"dist", dist, "archs",archs, "components", components)
+    logger.info("fetching repo {} dist {} archs {} components {}" \
+            .format((url, dist, archs, components)))
 
     for p in [ "ChangeLog", "InRelease",  "Release", "Release.gpg" ]:
         try:
@@ -246,42 +246,37 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
             subpath = distpath + '/binary-' + arch
             packages_gz = find_packages_file(localdir, subpath)
 
-            print("scanning {} ({})".format(packages_gz, arch), end="")
+            logger.debug("scanning {} ({})".format(packages_gz, arch))
             results = filter_packages_apt(packages_gz, filter_sections, filter_regex)
             total = len(results)
             current = 0
-            print(" ({})".format(total))
+            logger.debug(" ({} packages)".format(total))
 
             progress_updater('{} {}/{}'.format(comp,0,total))
 
             for path, package, version, arch, desc in results:
                 localfile = os.path.join(localdir, path)
                 exists_locally =  os.path.exists(localfile)
-                #print("path {} exists: {}".format(localfile, exists_locally))
 
                 key = make_pkg_key(package, arch)
                 old_version = None
-                # print(" new version:", version)
                 if key in old_packages[comp]:
                     old_version = old_packages[comp][key]
-                    # print(key, version, old_packages[comp][key])
                 else:
-                    print("package has no old version", key, comp, arch)
+                    logger.debug("package has no old version: {} {} {}".format(key + comp, arch))
                     miss_count += 1
                     if False and miss_count > 5:
                         for k,v in old_packages[comp].items():
-                            print("{}: {}".format(k,v))
+                            logger.debug("{}: {}".format(k,v))
                         sys.exit(0)
 
                 if old_version is not None:
                     if c.compare(version, old_packages[comp][key]) <= 0:
-                        #print(" skipping older version", version)
                         # if we have an older version but the file
                         # does not exist locally, fetch it
                         if exists_locally:
                             continue
 
-                # print(path, package, version, arch)
                 fetch.fetch(url, path, localdir)
                 current += 1
                 if (current % 16 == 0):
@@ -289,7 +284,7 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
 
             total_results.extend(results)
             results = None
-        print(" ", current,"new packages")
+        logger.info(" " + current + " new packages")
     return total_results
 
 

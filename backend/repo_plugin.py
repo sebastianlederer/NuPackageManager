@@ -1,12 +1,15 @@
 import datetime
 import os
 import traceback
+import logging
 import reposnap
 import reposnap.apt
 import reposnap.rpm
 import reposnap.takesnap
 import config
 import dpkg_cmp
+
+logger = logging.getLogger("nupama")
 
 descr_max_length = 130
 
@@ -35,7 +38,7 @@ def repocopy(dbconn, repo):
     else:
         dst_dir = get_local_dir(repo)
         src_dir = get_pred_dir(repo)
-        print("repocopy {} -> {}".format(src_dir,dst_dir))
+        logger.info("repocopy {} -> {}".format(src_dir,dst_dir))
         reposnap.takesnap.copydir(src_dir, dst_dir)
         copy_repo_packages(dbconn, repo)
         result = ''
@@ -44,7 +47,7 @@ def repocopy(dbconn, repo):
 
 def repodelete(dbconn, repo):
     dst_dir = get_local_dir(repo)
-    print("repodelete {}".format(dst_dir))
+    logger.info("repodelete {}".format(dst_dir))
     reposnap.takesnap.cleardir(dst_dir)
     result = ''
     update_repo_status(dbconn, repo.id, result, datetime.datetime.now())
@@ -58,8 +61,8 @@ def copy_repo_packages(dbconn, repo):
     with dbconn.cursor() as cursor:
         cursor.execute("DELETE FROM package WHERE repo=%s", (repo.id,))
 
-        print("deleted package versions from repo id", repo.id)
-        print("copying packages from {} to {}".format(repo.pred, repo.id))
+        logger.info("deleted package versions from repo id {}".format(repo.id))
+        logger.info("copying packages from {} to {}".format(repo.pred, repo.id))
 
         cursor.execute("""
             INSERT INTO package(name, description, version, vers_origin, vers_pred, arch, repo)
@@ -71,7 +74,7 @@ def copy_repo_packages(dbconn, repo):
 
 
 def crs_update_pkg_versions(cursor, repo):
-    print("update_pkg_versions", repo.name, repo.id)
+    logger.debug("update_pkg_versions {} {}".format(repo.name, repo.id))
 
     cursor.execute("SELECT * FROM repository WHERE id=%s", (repo.origin,))
     origin = cursor.fetchone()
@@ -136,7 +139,7 @@ def update_repo_packages(dbconn, repo, fetched):
     packages = {}
     with dbconn.cursor() as cursor:
         cursor.execute("DELETE FROM package WHERE repo=%s", (repo.id,))
-        print("deleted package versions from repo id",repo.id, repo.name)
+        logger.debug("deleted package versions from repo id {} {}".format(repo.id, repo.name))
 
         for path, package, version, arch, description in fetched:
             key = "{}%{}".format(package,arch)
@@ -157,7 +160,7 @@ def update_repo_packages(dbconn, repo, fetched):
                 ON CONFLICT (name, arch, repo) DO UPDATE SET version = EXCLUDED.version
             """, (package, description, version, arch, repo.id))
 
-        print("updated {} package versions from metadata for repo id".format(len(fetched)), repo.id)
+        logger.info("updated {} package versions from metadata for repo id {}".format(len(fetched), repo.id))
 
         cursor.execute("""UPDATE host SET needsrefresh=TRUE WHERE id IN
                 (SELECT id FROM host WHERE profile IN
@@ -195,7 +198,7 @@ def progress_updater(dbconn, p):
 
 
 def mirror(dbconn, repo):
-    print("executing mirror action for", repo.name)
+    logger.info("executing mirror action for " + repo.name)
 
     suffix = ".unknown"
 
@@ -210,16 +213,16 @@ def mirror(dbconn, repo):
             update_repo_status(dbconn, repo.id, None, repo.last_update)
             return
 
-        print("  upstream is", upstream.name)
-        print("  repo type  ", upstream.type)
-        print("  arch       ", upstream.arch)
+        logger.info("  upstream:   " + upstream.name)
+        logger.info("  repo type:  " + upstream.type)
+        logger.info("  arch:       " + upstream.arch)
 
         fetched = []
 
         try:
             if upstream.type in ['apt', 'apt-trusted']:
                 suffix = ".deb"
-                print("  components ", upstream.component)
+                logger.info("  components " + str(upstream.component))
 
                 localdir = get_local_dir(repo)
                 components = upstream.component.split(" ")
@@ -234,7 +237,7 @@ def mirror(dbconn, repo):
                 fetched = reposnap.rpm.get_rpm_repo(upstream.url, localdir,
                     lambda p: progress_updater(dbconn, p))
             else:
-                print("  unknown repo type")
+                logger.warning("  unknown repo type")
 
             update_repo_packages(dbconn, repo, fetched)
             cleanup_packages(localdir, fetched, suffix)
@@ -260,11 +263,11 @@ def cleanup_packages(localdir, fetched, suffix):
                 if f not in files_dict:
                     os.remove(os.path.join(root,f))
                     counter += 1
-    print("{} old package files removed".format(counter))
+    logger.info("{} old package files removed".format(counter))
 
 
 def mirror_by_schedule(dbconn, schedule_name):
-    print("scheduling mirror action", schedule_name);
+    logger.info("scheduling mirror action", schedule_name);
     with dbconn.cursor() as cursor:
         cursor.execute("""
             UPDATE repository SET action='M' where schedule=%s
@@ -300,17 +303,16 @@ def process_repo(dbconn, r):
 
 
 def handler(dbconn):
-    print("repository update handler")
+    logger.debug("repository update handler")
     with dbconn.cursor() as cursor:
         cursor.execute("SELECT * FROM repository WHERE action IS NOT NULL and action <> ''")
         for r in cursor:
             try:
-                print(r.name, r.upstream, r.action)
+                logger.debug("{} {} {}".format(r.name, r.upstream, r.action))
                 process_repo(dbconn, r)
                 update_pkg_versions_chain(dbconn, r.id)
             except:
-                traceback.print_exc()
-                print("error executing action {} for repository {}".format(r.action, r.name))
+                logger.exception("error executing action {} for repository {}".format(r.action, r.name))
 
 
 def schedule(dbconn, schedule_name):

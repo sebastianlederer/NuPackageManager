@@ -8,6 +8,9 @@ import json
 import repo_plugin,host_plugin
 import config
 import traceback
+import logging
+
+logger = logging.getLogger("nupama")
 
 dbconn = None
 dburl = None
@@ -53,7 +56,7 @@ def process_schedule(dbconn, schedule_name):
 
 def update_handler(dbconn):
     global handler_plugin_list
-    print("update_handler called")
+    logger.debug("update_handler called")
     for h in handler_plugin_list:
         h(dbconn)
         if dbconn.status != psycopg2.extensions.STATUS_READY:
@@ -62,7 +65,6 @@ def update_handler(dbconn):
 
 
 def database_changed(dbconn, cursor,serial,id,handler):
-        # print " update"
         handler(dbconn)
         time.sleep(3)
 
@@ -73,7 +75,7 @@ def watch_db(db,id,handler):
         try:
             handler(db)
         except Exception as ex:
-            traceback.print_exc()
+            logger.exception("calling handler")
 
         cursor=db.cursor()
         run = True
@@ -86,18 +88,16 @@ def watch_db(db,id,handler):
                 cursor.execute("UPDATE notification SET ack=%d WHERE id=%d" % (serial,id))
                 db.commit()
                 if ack<serial:
-                        print("serial", ack, "->", serial)
+                        logger.debug("serial {} -> {}".format(ack, serial))
                         database_changed(db,cursor,serial,id,handler)
                 run = True
             except psycopg2.errors.InFailedSqlTransaction as ex:
-                traceback.print_exc()
-                print("\ncancelling failed transaction")
+                logger.exception("cancelling failed transaction")
                 db.cancel()
                 db.reset()
                 run = False
             except Exception as ex:
-                traceback.print_exc()
-                print("\nresuming main loop")
+                logger.exception("exception during select, resuming main loop")
                 run = False
         cursor.close()
 
@@ -191,20 +191,33 @@ def main():
     config.read_config()
 
     cmd = sys.argv[1]
-    reconnect = True
+    reconnect = False
+    connect_count = 0
     dbconn = None
+
+    logging.basicConfig(level=logging.INFO,
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S')
+
+    if cmd == "watch":
+            reconnect = True
+            logger.info("backend started")
 
     while reconnect:
         if dbconn is None or dbconn.closed:
             try:
                 dbconn = psycopg2.connect(config.dsn, cursor_factory=psycopg2.extras.NamedTupleCursor)
+                connect_count += 1
             except psycopg2.OperationalError as e:
-                print("database connection failed", e)
+                logger.exception("database connection failed")
                 time.sleep(5)
                 continue
 
         if cmd == "watch":
-            print("database connection established", dbconn)
+            if connect_count > 1:
+                logger.info("database connection reestablished")
+            else:
+                logger.debug("database connection established")
             watch_db(dbconn, 1, update_handler)
         elif cmd == "schedule":
             reconnect = False
@@ -222,6 +235,8 @@ def main():
     except:
         pass
 
+    if cmd == "watch":
+        logger.info("backend shutdown")
 
 if __name__ == "__main__":
     main()

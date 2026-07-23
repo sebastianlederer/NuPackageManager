@@ -4,12 +4,15 @@ import os
 import time
 import sys
 import traceback
+import logging
 import email.utils
 import shutil
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import http.client
+
+logger = logging.getLogger("nupama")
 
 cached_session = None
 
@@ -45,7 +48,6 @@ def close_session():
 def http_request(method, url, headers):
     connection = None
     scheme, _, server, path = url.split('/', 3)
-    #print("http_request",scheme, method, server, path)
 
     session = get_session()
 
@@ -59,8 +61,7 @@ def http_request(method, url, headers):
                 timeout = 300
                 raise Exception("HTTP status 503 - Service Unavailable")
         except Exception as e:
-            #traceback.print_exc(0)
-            print(e)
+            logger.exception("GET request")
             close_session()
     else:
         raise Exception("unsupported method")
@@ -77,7 +78,7 @@ def get_modified(url, oldfilepath):
         m_stamp = stats.st_mtime
         timestr = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime(m_stamp))
 
-        print(" If-Modified-Since: ", timestr, end=" " )
+        logger.debug(" If-Modified-Since: " + timestr)
 
         headers = { "If-Modified-Since": timestr }
     except:
@@ -92,15 +93,15 @@ def get_modified(url, oldfilepath):
 
     if resp.status_code >=400:
         if resp.status_code != 404:
-            print("error response text:",resp.text)
+            logger.warning("error response text: " + resp.text)
         raise http.client.HTTPException("status {} fetching {}".format(resp.status_code, url))
 
     if resp.status_code != 304:
-        print("HTTP status:", resp.status_code)
+        logger.debug("HTTP status: {}".format(resp.status_code))
         if 'Last-Modified' in resp.headers:
             last_modified = resp.headers['Last-Modified']
             m_stamp = email.utils.mktime_tz(email.utils.parsedate_tz(last_modified))
-            print("Last-Modified: ", last_modified, end="")
+            logger.debug("Last-Modified: " + last_modified)
 
         # remove old file to break hard links
         try:
@@ -124,8 +125,7 @@ def get_modified(url, oldfilepath):
         if m_stamp is not None:
             os.utime(oldfilepath, (time.time(), m_stamp))
     else:
-        print(" (not modified)", end="")
-    print()
+        logger.debug(" (not modified)")
     return modified
 
 

@@ -2,12 +2,16 @@ import subprocess
 import time
 import string
 import json
+import os
+import logging
 import psycopg2
 import psycopg2.extras
 from multiprocessing import Pool
 from collections import namedtuple
 import config
 import dpkg_cmp
+
+logger = logging.getLogger("nupama")
 
 HostTuple = namedtuple("HostTuple", "id name profile action action_args index max")
 
@@ -81,7 +85,7 @@ def crs_get_latest_packages(cursor, host):
 
 
 def crs_update_pkg_versions(cursor, host):
-    print("updating pkg versions for host",host.name)
+    logger.info("updating pkg versions for host " + host.name)
 
     latest_packages, latest_packages_origin = crs_get_latest_packages(cursor, host)
 
@@ -182,12 +186,12 @@ def get_combined_roles(dbconn, host):
 
 
 def command(cmd):
-    print("executing command ",cmd)
+    logger.info("executing command " + cmd)
     subprocess.check_call(cmd, shell=True)
 
 
 def command_output(cmd, script):
-    print("executing command",cmd)
+    logger.info("executing command" + cmd)
     child = subprocess.Popen(cmd, shell=True, encoding='utf8',
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, err = child.communicate(input=script, timeout=config.command_timeout)
@@ -223,7 +227,7 @@ def perform_report(dbconn, host):
         clean_l = l.strip()
         if clean_l == "##REBOOT":
             reboot_req = True
-            print("reboot required for",host.name)
+            logger.info("reboot required for " + host.name)
         else:
             try:
                 name, version, arch = clean_l.split(" ")
@@ -231,7 +235,7 @@ def perform_report(dbconn, host):
                     raise Exception('malformed line')
                 pkgs.append((name, version, arch))
             except:
-                print("malformed line:",clean_l)
+                logger.debug("malformed line: " + clean_l)
 
     update_host_pkgs(dbconn, host, pkgs)
 
@@ -239,6 +243,20 @@ def perform_report(dbconn, host):
     mark_host_for_refresh(dbconn, host)
 
     return "OK"
+
+
+def get_host_logfile(hostname):
+    return os.path.join(config.host_log_dir, hostname + ".log")
+
+
+def reset_host_log(host, message):
+    with open(get_host_logfile(host.name), "w") as f:
+        f.write(message + "\n")
+
+
+def host_log(host, message):
+    with open(get_host_logfile(host.name), "a") as f:
+        f.write(message)
 
 
 def perform_upgrade(dbconn, host):
@@ -250,8 +268,8 @@ def perform_upgrade(dbconn, host):
     script = config.get_scriptlet('upgrade')
     exitcode, output = remote_command(host, script)
 
-    print("perform_upgrade:")
-    print(output)
+    reset_host_log(host, "perform_upgrade:")
+    host_log(host, output)
 
     if exitcode == 0:
         return "OK"
@@ -280,6 +298,9 @@ def perform_custom(dbconn, host):
     script = host.action_args
     exitcode, output = remote_command(host, script)
 
+    reset_host_log(host, "custom command:")
+    host_log(host, script)
+
     if exitcode == 0:
         return "OK"
     else:
@@ -295,11 +316,12 @@ def perform_roles(dbconn, host):
     script_template = string.Template(config.get_scriptlet("roles"))
     script = script_template.substitute({ "hostname": host.name, "roles":roles_json })
 
-    print(script)
+    reset_host_log(host, "script:")
+    host_log(host, script)
 
     exitcode, output = local_command(host, script)
 
-    print(output)
+    host_log(host, output)
 
     output = output.splitlines()
 
@@ -427,14 +449,19 @@ def perform_config(dbconn, host):
     repolist = " ".join(repos)
     cleanconf_script = cleanconf_template.substitute({"repos":repolist})
 
-    print(cleanconf_script)
+    reset_host_log(host, "cleanconf script:")
+    host_log(host, cleanconf_script)
     exitcode, output = remote_command(host, cleanconf_script)
     if exitcode != 0:
-        print(exitcode, output)
+        host_log(host, str(exitcode) + "\n")
+        host_log(host, output)
 
-    print(script)
+    host_log(host, "conf script:")
+    host_log(host, script)
 
     exitcode, output = remote_command(host, script)
+
+    host_log(host, output)
 
     if exitcode == 0:
         return "OK"
@@ -504,13 +531,14 @@ def new_dbconn():
 
 
 def forked_action(host):
-    print("forked_action",host.name,host.action)
+    logger.info("starting action {} for host {}".format(host.action, host.name))
     # we need a new db connection because
     # this is a forked process
     dbconn = new_dbconn()
     action_result = perform_action(dbconn, host)
     update_host_status(dbconn, host.id, action_result)
     set_taskstatus(dbconn, host, host.index, host.max, describe_action(dbconn, host))
+    logger.info("action {} for host {} complete".format(host.action, host.name))
 
 
 def parallel_action(dbconn, hosts):
@@ -536,7 +564,7 @@ def reset_counter():
 
 
 def handler(dbconn):
-    print("host update handler")
+    logger.debug("host update handler")
     reset_counter()
     with dbconn.cursor() as cursor:
         cursor.execute("SELECT * FROM host WHERE action IS NOT NULL AND action <>'' ORDER BY name")
@@ -556,7 +584,7 @@ def schedule(dbconn, schedule_name):
     if schedule_name != "report":
         return
 
-    print("host schedule handler")
+    logger.debug("host schedule handler")
     with dbconn.cursor() as cursor:
         cursor.execute("UPDATE host SET action='R' WHERE action = '' or action is NULL")
         dbconn.commit()
