@@ -195,7 +195,7 @@ def main():
     connect_count = 0
     dbconn = None
 
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=config.loglevel,
         format='%(asctime)s %(levelname)-8s %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S')
 

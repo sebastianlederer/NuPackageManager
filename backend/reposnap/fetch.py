@@ -52,7 +52,7 @@ def fetch(baseurl, path, localdir, recursive=False):
 
     newurl = extend_url(baseurl, path)
 
-    logger.debug(newurl, ' -> ', localpath)
+    logger.debug(newurl +  ' -> ' + localpath)
 
     return getmodified.get_modified(newurl, localpath)
 

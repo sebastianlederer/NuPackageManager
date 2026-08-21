@@ -243,6 +243,7 @@ def mirror(dbconn, repo):
             cleanup_packages(localdir, fetched, suffix)
             result = None
         except Exception as ex:
+            logger.exception("mirror action")
             result = str(ex)[:100]
 
         update_repo_status(dbconn, repo.id, result, datetime.datetime.now())

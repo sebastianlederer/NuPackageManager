@@ -211,7 +211,7 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
     c = dpkg_cmp.VersionComparator()
 
     logger.info("fetching repo {} dist {} archs {} components {}" \
-            .format((url, dist, archs, components)))
+            .format(url, dist, archs, components))
 
     for p in [ "ChangeLog", "InRelease",  "Release", "Release.gpg" ]:
         try:
@@ -263,7 +263,7 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
                 if key in old_packages[comp]:
                     old_version = old_packages[comp][key]
                 else:
-                    logger.debug("package has no old version: {} {} {}".format(key + comp, arch))
+                    logger.debug("package has no old version: {} {} {}".format(key, comp, arch))
                     miss_count += 1
                     if False and miss_count > 5:
                         for k,v in old_packages[comp].items():
@@ -284,7 +284,7 @@ def fetch_repo_components(components, url, localdir, dist, archs = None,
 
             total_results.extend(results)
             results = None
-        logger.info(" " + current + " new packages")
+        logger.info(" {} new packages".format(current))
     return total_results
 
 
