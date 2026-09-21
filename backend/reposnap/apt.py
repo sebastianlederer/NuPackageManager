@@ -170,7 +170,7 @@ def fetch_by_release_file(components, url, releasepath, localdir, archs):
                     try:
                         fetch.fetch(url, releasepath + fname, localdir)
                     except http.client.HTTPException as ex:
-                        logger.warning("  could not fetch" + fname + " " + str(ex))
+                        logger.warning("  could not fetch " + fname + " " + str(ex))
                         pass
 
                     # check if we need to add this file to the by-hash directory

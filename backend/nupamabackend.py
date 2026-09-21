@@ -191,7 +191,7 @@ def main():
     config.read_config()
 
     cmd = sys.argv[1]
-    reconnect = False
+    reconnect = True
     connect_count = 0
     dbconn = None
 
@@ -200,7 +200,6 @@ def main():
         datefmt='%Y-%m-%d %H:%M:%S')
 
     if cmd == "watch":
-            reconnect = True
             logger.info("backend started")
 
     while reconnect:

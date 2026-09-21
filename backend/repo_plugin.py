@@ -268,7 +268,7 @@ def cleanup_packages(localdir, fetched, suffix):
 
 
 def mirror_by_schedule(dbconn, schedule_name):
-    logger.info("scheduling mirror action", schedule_name);
+    logger.info("scheduling mirror action " + schedule_name);
     with dbconn.cursor() as cursor:
         cursor.execute("""
             UPDATE repository SET action='M' where schedule=%s
